@@ -71,7 +71,7 @@ void detect(const Mixture & mixture, const unsigned char* image_array,
                         bndbox.setHeight(std::min(bndbox.height(), height - bndbox.y()));
 
                         if (!bndbox.empty()) {
-                            detections.push_back(Detection(score, x, y, z, bndbox));
+                            detections.push_back(Detection(score, bndbox));
                         }
                     }
                 }
@@ -86,4 +86,47 @@ void detect(const Mixture & mixture, const unsigned char* image_array,
         detections.resize(remove_if(detections.begin() + i, detections.end(),
                                     Intersector(detections[i - 1], overlap, true)) -
                           detections.begin());
+}
+
+void detect(const std::string mixture_filepath,
+            const unsigned char* image_array,
+            const int width, const int height, const int padding,
+            const int interval, const double threshold, const double overlap,
+            std::vector<Detection> & detections) {
+
+    // Failed to load mixture model
+    Mixture mixture;
+    if(!load_mixture_model(mixture_filepath, mixture))
+        return;
+
+    detect(mixture, image_array, width, height, padding, interval, threshold,
+           overlap, detections);
+}
+
+void detect(const char* mixture_data,
+            const unsigned char* image_array,
+            const int width, const int height, const int padding,
+            const int interval, const double threshold, const double overlap,
+            std::vector<Detection> & detections) {
+
+    // Failed to load mixture model
+    Mixture mixture;
+    if(!load_mixture_model(mixture_data, mixture))
+        return;
+
+    detect(mixture, image_array, width, height, padding, interval, threshold,
+           overlap, detections);
+}
+
+bool load_mixture_model(const std::string filepath,
+                       Mixture& mixture) {
+    std::ifstream in(filepath.c_str(), std::ios::binary);
+
+    if (!in.is_open()) {
+        return false;
+    }
+
+    in >> mixture;
+
+    return true;
 }
