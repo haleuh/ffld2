@@ -1,3 +1,27 @@
+# Amended Readme
+This project was originally forked from https://github.com/fanxu/ffld2, which in
+turn was a repository created for the code of Charles Dubout.
+
+In this fork, I made two small contributions:
+
+  - Added a simple library (libffld2.so/dll) that will be built by default. This
+    is useful if you want to use this package in order conjunction with your
+    existing C++ code.
+  - Added the DPM facial detection model from:
+        https://bitbucket.org/rodrigob/doppia
+    as the file `models/headhunter_dpm_baseline.txt`
+    This has been converted from the voc-release5 format to the format needed
+    for this codebase.
+
+It is important to make two things clear:
+
+  1. I release all of these modifications (EXCEPT the facial DPM model) under
+     the same licensing scheme as the original codebase (see COPYING.txt)
+  2. I claim no ownership over the facial DPM model that I am distributing,
+     and I am distributing it in good faith under the same licensing terms
+     as the doppia project (SEE DOPPIA_LICENSE.txt).
+
+# Original Readme
                           Implementation of the papers
 
                 "Exact Acceleration of Linear Object Detectors"
@@ -8,7 +32,6 @@
 
       Copyright (c) 2013 Idiap Research Institute, <http://www.idiap.ch/>
               Written by Charles Dubout <charles.dubout@idiap.ch>
-
 
                                   INTRODUCTION
 
@@ -47,14 +70,21 @@ in row-major order, and of size nbRows x nbCols x nbFeatures.
 
 In the current implementation nbFeatures must be 32, the number of HOG features
 (or 48 if FFLD was compiled with FFLD_HOGPYRAMID_EXTRA_FEATURES=ON).
+
 One can use the provided Matlab script 'convertmodel4.m' to convert to this
 format the models of P. Felzenszwalb, R. Girshick and D. McAllester.
-Discriminatively Trained Deformable Part Models, Release 4.
-http://people.cs.uchicago.edu/~pff/latent-release4/.
+
+    Discriminatively Trained Deformable Part Models, Release 4.
+    http://people.cs.uchicago.edu/~pff/latent-release4/.
+
 One can use the provided Matlab script 'convertmodel5.m' to convert to this
 format the models of P. Felzenszwalb, R. Girshick and D. McAllester.
-Discriminatively Trained Deformable Part Models, Release 5.
-http://people.cs.uchicago.edu/~rbg/latent-release5/.
+
+    Discriminatively Trained Deformable Part Models, Release 5.
+    http://people.cs.uchicago.edu/~rbg/latent-release5/.
+
+The model conversion Matlab scripts rely on having the code from the correct
+release (voc-release4 or voc-release5) on the Matlab path in order to work.
 
   -n,--name <arg>
   Name of the object to train or detect (default "person")
