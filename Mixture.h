@@ -47,8 +47,36 @@ public:
 	/// @param[in] nbComponents Number of mixture components (without symmetry).
 	/// @param[in] scenes Scenes to use for training.
 	/// @param[in] name Name of the objects to detect.
-	Mixture(int nbComponents, const std::vector<Scene> & scenes, Object::Name name);
-	
+	template <typename T>
+	Mixture(int nbComponents, const std::vector<T> & scenes, Object::Name name) : cached_(false), zero_(true)
+    {
+        // Create an empty mixture if any of the given parameters is invalid
+        if ((nbComponents <= 0) || scenes.empty()) {
+            return;
+        }
+
+        // Compute the root filters' sizes using Felzenszwalb's heuristic
+        const std::vector<std::pair<int, int> > sizes = FilterSizes(nbComponents, scenes, name);
+        init_models_with_sizes(sizes, nbComponents);
+    }
+
+	/// Constructs a mixture with the specified number of mixture components. The sizes of the
+    /// models are determined from the sizes of the objects using Felzenszwalb's heuristic.
+    /// @param[in] nbComponents Number of mixture components (without symmetry).
+    /// @param[in] positive_scenes Scenes to use for training.
+    template <typename T>
+    Mixture(int nbComponents, const std::vector<T> & positive_scenes) : cached_(false), zero_(true)
+    {
+    	// Create an empty mixture if any of the given parameters is invalid
+    	if ((nbComponents <= 0) || positive_scenes.empty()) {
+    		return;
+    	}
+
+    	// Compute the root filters' sizes using Felzenszwalb's heuristic
+    	const std::vector<std::pair<int, int> > sizes = FilterSizes(nbComponents, positive_scenes);
+        init_models_with_sizes(sizes, nbComponents);
+    }
+
 	/// Returns whether the mixture is empty. An empty mixture has no model.
 	bool empty() const;
 	
@@ -81,6 +109,30 @@ public:
 	double train(const std::vector<Scene> & scenes, Object::Name name, int padx = 12, int pady = 12,
 				 int interval = 5, int nbRelabel = 5, int nbDatamine = 10, int maxNegatives = 24000,
 				 double C = 0.002, double J = 2.0, double overlap = 0.7);
+
+    /// Trains the mixture using in-memory scenes of separate guaranteed positive and negative
+    /// examples.
+    /// @param[in] positive_scenes Scenes to use for positive training.
+    /// @param[in] negative_scenes Scenes to use for negative training.
+    /// @param[in] name Name of the objects to detect.
+    /// @param[in] padx Amount of horizontal zero padding (in cells).
+    /// @param[in] pady Amount of vertical zero padding (in cells).
+    /// @param[in] interval Number of levels per octave in the pyramid.
+    /// @param[in] nbRelabel Number of training iterations.
+    /// @param[in] nbDatamine Number of data-mining iterations within each training iteration.
+    /// @param[in] maxNegatives Maximum number of hard negative examples to sample.
+    /// @param[in] C Regularization constant of the SVM.
+    /// @param[in] J Weighting factor of the positives.
+    /// @param[in] overlap Minimum overlap in latent positive search.
+    /// @returns The final SVM loss.
+    /// @note The magic constants come from Felzenszwalb's implementation.
+    double trainInMemory(const std::vector<InMemoryScene> & positive_scenes,
+                         const std::vector<InMemoryScene> & negative_scenes,
+                         const int padx = 12, const int pady = 12,
+                         const int interval = 5, const int nbRelabel = 5,
+                         const int nbDatamine = 10, const int maxNegatives = 24000,
+                         const double C = 0.002, const double J = 2.0,
+                         const double overlap = 0.7);
 	
 	/// Initializes the specidied number of parts from the root of each model.
 	/// @param[in] nbParts Number of parts (without the root).
@@ -103,15 +155,33 @@ public:
 	void cacheFilters() const;
 	
 private:
+    void init_models_with_sizes(const std::vector<std::pair<int, int> > sizes,
+                                const int nbComponents);
 	// Extracts all the positives
-	void posLatentSearch(const std::vector<Scene> & scenes, Object::Name name,
-						 int padx, int pady, int interval, double overlap,
+	void posLatentSearch(const std::vector<Scene> & scenes, const Object::Name name,
+						 const int padx, const int pady, const int interval, const double overlap,
 						 std::vector<std::pair<Model, int> > & positives) const;
+
+	void posLatentSearchInMemory(const std::vector<InMemoryScene> & scenes,
+                                 const int padx, const int pady, const int interval, const double overlap,
+    							 std::vector<std::pair<Model, int> > & positives) const;
+
+    void scorePositiveScene(const JPEGImage image, const std::vector<Object> objects,
+                            const int padx, const int pady, const int interval, double overlap,
+                            std::vector<std::pair<Model, int> > & positives) const;
 	
 	// Bootstraps negatives with a non zero loss
-	void negLatentSearch(const std::vector<Scene> & scenes, Object::Name name,
-						 int padx, int pady, int interval, int maxNegatives,
+	void negLatentSearch(const std::vector<Scene> & scenes, const Object::Name name,
+						 const int padx, const int pady, const int interval, const int maxNegatives,
 						 std::vector<std::pair<Model, int> > & negatives) const;
+
+	void negLatentSearchInMemory(const std::vector<InMemoryScene> & scenes,
+                                 const int padx, const int pady, const int interval, const int maxNegatives,
+    							 std::vector<std::pair<Model, int> > & negatives) const;
+
+    void scoreNegativeScene(const JPEGImage image, const std::vector<Object> objects, const int scene_index,
+                            const int nbCached, const int padx, const int pady, const int interval, const int maxNegatives,
+                            std::vector<std::pair<Model, int> > & negatives, int current_count) const;
 	
 	// Trains the mixture from positive and negative samples with fixed latent variables
 	double train(const std::vector<std::pair<Model, int> > & positives,
@@ -125,10 +195,39 @@ private:
 				  std::vector<std::vector<std::vector<Model::Positions> > > * positions = 0) const;
 	
 	// Computes the size of the roots of the models
-	static std::vector<std::pair<int, int> > FilterSizes(int nbComponents,
-														 const std::vector<Scene> & scenes,
-														 Object::Name name);
-	
+	template <typename T>
+	std::vector<std::pair<int, int> > FilterSizes(const int nbComponents, const std::vector<T> & scenes)
+    {
+        std::vector<Object> positive_objects;
+
+    	for (int i = 0; i < scenes.size(); ++i) {
+            for (int j = 0; j < scenes[i].objects().size(); ++j) {
+                positive_objects.push_back(scenes[i].objects()[j]);
+            }
+        }
+
+        return FilterSizes(nbComponents, positive_objects);
+    }
+
+    template <typename T>
+    std::vector<std::pair<int, int> > FilterSizes(const int nbComponents, const std::vector<T> & scenes, Object::Name name)
+    {
+        std::vector<Object> positive_objects;
+
+    	for (int i = 0; i < scenes.size(); ++i) {
+            for (int j = 0; j < scenes[i].objects().size(); ++j) {
+                const Object & obj = scenes[i].objects()[j];
+
+                if ((obj.name() == name) && !obj.difficult())
+                    positive_objects.push_back(obj);
+            }
+        }
+
+        return FilterSizes(nbComponents, positive_objects);
+    }
+    static std::vector<std::pair<int, int> > FilterSizes(const int nbComponents,
+                                                         const std::vector<Object> & positive_objects);
+
 	// Attempts to split samples into a left facing cluster and a right facing cluster
 	static void Cluster(int nbComponents, std::vector<std::pair<Model, int> > & samples);
 	

@@ -23,6 +23,7 @@
 #define FFLD_SCENE_H
 
 #include "Object.h"
+#include "JPEGImage.h"
 
 #include <string>
 #include <vector>
@@ -85,7 +86,7 @@ public:
 	/// Sets the list of objects present in the scene.
 	void setObjects(const std::vector<Object> & objects);
 	
-private:
+protected:
 	int width_;
 	int height_;
 	int depth_;
@@ -98,6 +99,43 @@ std::ostream & operator<<(std::ostream & os, const Scene & scene);
 
 /// Unserializes a scene from a stream.
 std::istream & operator>>(std::istream & is, Scene & scene);
+
+class InMemoryScene : public Scene
+{
+public:
+	/// Constructs an empty scene. An empty scene has no image and no object.
+	InMemoryScene();
+
+	/// Constructs an InMemoryScene from pixels and a list of objects.
+	/// @param[in] width Width of the image.
+	/// @param[in] height Height of the image.
+	/// @param[in] depth Depth of the image.
+	/// @param[in] objects List of objects present in the scene.
+	InMemoryScene(const unsigned char* image,
+                  const int width, const int height, const int depth,
+                  const std::vector<Object> & objects);
+
+	/// Constructs an InMemoryScene from a JPEGImage and a list of objects.
+	/// @param[in] width Width of the image.
+	/// @param[in] height Height of the image.
+	/// @param[in] depth Depth of the image.
+	/// @param[in] objects List of objects present in the scene.
+	InMemoryScene(const JPEGImage image,
+                  const int width, const int height, const int depth,
+                  const std::vector<Object> & objects);
+
+    /// Returns the image.
+    const JPEGImage & image() const;
+
+protected:
+	JPEGImage image_;
+};
+
+/// Serializes a InMemoryScene to a stream.
+std::ostream & operator<<(std::ostream & os, const InMemoryScene & scene);
+
+/// Unserializes a InMemoryScene from a stream.
+std::istream & operator>>(std::istream & is, InMemoryScene & scene);
 }
 
 #endif

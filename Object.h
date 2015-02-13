@@ -58,6 +58,10 @@ public:
 	/// @param[in] difficult Whether the object is annotated as being difficult.
 	/// @param[in] bndbox Bounding box of the object.
 	Object(Name name, Pose pose, bool truncated, bool difficult, Rectangle bndbox);
+
+    /// Constructs an object from a bounding box.
+    /// @param[in] bndbox Bounding box of the object.
+	Object(Rectangle bndbox);
 	
 	/// Returns whether the object is empty.
 	/// An empty object has name 'unknown', pose 'unspecified', and all other parameters set to

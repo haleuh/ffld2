@@ -30,6 +30,10 @@ Object::Object() : name_(UNKNOWN), pose_(UNSPECIFIED), truncated_(false), diffic
 {
 }
 
+Object::Object(Rectangle bndbox) : name_(UNKNOWN), pose_(UNSPECIFIED), truncated_(false), difficult_(false), bndbox_(bndbox)
+{
+}
+
 Object::Object(Name name, Pose pose, bool truncated, bool difficult, Rectangle bndbox) :
 name_(name), pose_(pose), truncated_(truncated), difficult_(difficult), bndbox_(bndbox)
 {

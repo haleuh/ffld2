@@ -99,10 +99,10 @@ Scene::Scene(const string & filename)
 		if (!xmlStrcmp(cur->name, reinterpret_cast<const xmlChar *>("filename"))) {
 			// Full path
 			size_t last = filename.rfind('/');
-			
+
 			if (last != string::npos) {
 				last = filename.rfind('/', last - 1);
-				
+
 				if (last != string::npos)
 					filename_ = filename.substr(0, last) + "/JPEGImages/" +
 								content<string>(cur);
@@ -269,5 +269,65 @@ istream & FFLD::operator>>(istream & is, Scene & scene)
 	
 	scene = Scene(width, height, depth, filename, objects);
 	
+	return is;
+}
+
+/************************** In Memory Scene ***********************************/
+
+InMemoryScene::InMemoryScene()
+{
+}
+
+InMemoryScene::InMemoryScene(const unsigned char* image,
+                             const int width, const int height, const int depth,
+                             const std::vector<Object> & objects) :
+    Scene(width, height, depth , "", objects)
+{
+    image_ = JPEGImage(width, height, depth, image);
+}
+
+InMemoryScene::InMemoryScene(const JPEGImage image,
+                             const int width, const int height, const int depth,
+                             const std::vector<Object> & objects) :
+    Scene(width, height, depth , "", objects)
+{
+    image_ = image;
+}
+
+const JPEGImage & InMemoryScene::image() const
+{
+	return image_;
+}
+
+ostream & FFLD::operator<<(ostream & os, const InMemoryScene & scene)
+{
+	os << scene.width() << ' ' << scene.height() << ' ' << scene.depth() << ' '
+	   << scene.objects().size() << ' ' << scene.image() << endl;
+
+	for (int i = 0; i < scene.objects().size(); ++i)
+		os << scene.objects()[i] << endl;
+
+	return os;
+}
+
+istream & FFLD::operator>>(istream & is, InMemoryScene & scene)
+{
+	int width, height, depth, nbObjects;
+	JPEGImage image;
+
+    is >> width >> height >> depth >> nbObjects >> image;
+
+	vector<Object> objects(nbObjects);
+
+	for (int i = 0; i < nbObjects; ++i)
+		is >> objects[i];
+
+	if (!is) {
+		scene = InMemoryScene();
+		return is;
+	}
+
+	scene = InMemoryScene(image, width, height, depth, objects);
+
 	return is;
 }
