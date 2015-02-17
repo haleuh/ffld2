@@ -707,14 +707,9 @@ void Mixture::negLatentSearch(const vector<Scene> & scenes, const Object::Name n
 	const int nbCached = static_cast<int>(negatives.size());
 	
 	for (int i = 0, j = 0; i < scenes.size(); ++i) {
-		vector<Object> negative_objects;
-		
 		for (int k = 0; k < scenes[i].objects().size(); ++k)
 			if (scenes[i].objects()[k].name() == name)
-				negative_objects.push_back(scenes[i].objects()[k]);
-		
-		if (negative_objects.empty())
-			continue;
+				continue;
 		
 		const JPEGImage image(scenes[i].filename());
 		
@@ -723,7 +718,7 @@ void Mixture::negLatentSearch(const vector<Scene> & scenes, const Object::Name n
 			return;
 		}
 		
-        if(!scoreNegativeScene(image, negative_objects, i, nbCached,
+        if(!scoreNegativeScene(image, i, nbCached,
 							   padx, pady, interval, maxNegatives,
 							   negatives, j))
         	return;
@@ -742,8 +737,6 @@ void Mixture::negLatentSearchInMemory(const vector<InMemoryScene> & scenes,
         return;
     }
 
-	negatives.clear();
-
 	// The number of negatives already in the cache
     const int nbCached = static_cast<int>(negatives.size());
 
@@ -754,16 +747,17 @@ void Mixture::negLatentSearchInMemory(const vector<InMemoryScene> & scenes,
             return;
         }
 
-        if (!scoreNegativeScene(scenes[i].image(), scenes[i].objects(), i, nbCached,
+        if (!scoreNegativeScene(scenes[i].image(), i, nbCached,
                            		padx, pady, interval, maxNegatives,
                            		negatives, j))
         	return;
     }
 }
 
-bool Mixture::scoreNegativeScene(const JPEGImage image, const vector<Object> objects, const int scene_index,
-                                 const int nbCached, const int padx, const int pady, const int interval, const int maxNegatives,
-                                 vector<pair<Model, int> > & negatives, int current_count) const
+bool Mixture::scoreNegativeScene(const JPEGImage image, const int scene_index,
+                                 const int nbCached, const int padx,
+                                 const int pady, const int interval, const int maxNegatives,
+                                 vector<pair<Model, int> > & negatives, int &current_count) const
 {
     const HOGPyramid pyramid(image, padx, pady, interval);
 
@@ -813,8 +807,9 @@ bool Mixture::scoreNegativeScene(const JPEGImage image, const vector<Object> obj
                         sample.parts()[0].deformation(3) = zero_ ? 0.0 : scores[z](y, x);
 
                         // Look if the same sample was already sampled
-                        while ((current_count < nbCached) && (negatives[current_count].first < sample))
-                            ++current_count;
+                        while ((current_count < nbCached) && (negatives[current_count].first < sample)) {
+                        	++current_count;
+                        }
 
                         // Make sure not to put the same sample twice
                         if ((current_count >= nbCached) || !(negatives[current_count].first == sample)) {
@@ -1044,8 +1039,6 @@ double Mixture::train(const vector<pair<Model, int> > & positives,
 					  const vector<pair<Model, int> > & negatives, double C, double J,
 					  int maxIterations)
 {
-	cout << "Training LBFGS - Positives: " << positives.size() << ", Negatives: " << negatives.size() << endl;
-
 	detail::Loss loss(models_, positives, negatives, C, J, maxIterations);
 	LBFGS lbfgs(&loss, 0.001, maxIterations, 20, 20);
 	

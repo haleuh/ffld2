@@ -179,9 +179,9 @@ private:
                                  const int padx, const int pady, const int interval, const int maxNegatives,
     							 std::vector<std::pair<Model, int> > & negatives) const;
 
-    bool scoreNegativeScene(const JPEGImage image, const std::vector<Object> objects, const int scene_index,
+    bool scoreNegativeScene(const JPEGImage image, const int scene_index,
                             const int nbCached, const int padx, const int pady, const int interval, const int maxNegatives,
-                            std::vector<std::pair<Model, int> > & negatives, int current_count) const;
+                            std::vector<std::pair<Model, int> > & negatives, int & current_count) const;
 	
 	// Trains the mixture from positive and negative samples with fixed latent variables
 	double train(const std::vector<std::pair<Model, int> > & positives,
