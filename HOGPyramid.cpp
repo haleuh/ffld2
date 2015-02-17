@@ -188,7 +188,7 @@ private:
 		for (int dy = -255; dy <= 255; ++dy) {
 			for (int dx = -255; dx <= 255; ++dx) {
 				// Magnitude in the range [0, 1]
-				const double magnitude = sqrt(dx * dx + dy * dy) / 255.0;
+				const double magnitude = sqrt(static_cast<double>(dx * dx + dy * dy)) / 255.0;
 				
 				// Angle in the range [-pi, pi]
 				double angle = atan2(static_cast<double>(dy), static_cast<double>(dx));
