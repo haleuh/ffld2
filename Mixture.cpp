@@ -558,7 +558,7 @@ void Mixture::posLatentSearchInMemory(const vector<InMemoryScene> & scenes,
 	}
 }
 
-void Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> objects,
+bool Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> objects,
                                  const int padx, const int pady, const int interval, double overlap,
                                  vector<pair<Model, int> > & positives) const
 {
@@ -566,7 +566,7 @@ void Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> obj
 
     if (pyramid.empty()) {
         positives.clear();
-        return;
+        return false;
     }
 
     vector<HOGPyramid::Matrix> scores;
@@ -670,6 +670,7 @@ void Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> obj
                 positives.push_back(make_pair(sample, argModel));
         }
     }
+    return true;
 }
 
 static inline bool operator==(const Model & a, const Model & b)
@@ -722,11 +723,10 @@ void Mixture::negLatentSearch(const vector<Scene> & scenes, const Object::Name n
 			return;
 		}
 		
-        scoreNegativeScene(image, negative_objects, i, nbCached,
-                           padx, pady, interval, maxNegatives,
-                           negatives, j);
-        if (negatives.size() == maxNegatives)
-            return;
+        if(!scoreNegativeScene(image, negative_objects, i, nbCached,
+							   padx, pady, interval, maxNegatives,
+							   negatives, j))
+        	return;
 	}
 }
 
@@ -754,15 +754,14 @@ void Mixture::negLatentSearchInMemory(const vector<InMemoryScene> & scenes,
             return;
         }
 
-        scoreNegativeScene(scenes[i].image(), scenes[i].objects(), i, nbCached,
-                           padx, pady, interval, maxNegatives,
-                           negatives, j);
-        if (negatives.size() == maxNegatives)
-            return;
+        if (!scoreNegativeScene(scenes[i].image(), scenes[i].objects(), i, nbCached,
+                           		padx, pady, interval, maxNegatives,
+                           		negatives, j))
+        	return;
     }
 }
 
-void Mixture::scoreNegativeScene(const JPEGImage image, const vector<Object> objects, const int scene_index,
+bool Mixture::scoreNegativeScene(const JPEGImage image, const vector<Object> objects, const int scene_index,
                                  const int nbCached, const int padx, const int pady, const int interval, const int maxNegatives,
                                  vector<pair<Model, int> > & negatives, int current_count) const
 {
@@ -770,7 +769,7 @@ void Mixture::scoreNegativeScene(const JPEGImage image, const vector<Object> obj
 
     if (pyramid.empty()) {
         negatives.clear();
-        return;
+        return false;
     }
 
     vector<HOGPyramid::Matrix> scores;
@@ -822,13 +821,14 @@ void Mixture::scoreNegativeScene(const JPEGImage image, const vector<Object> obj
                             negatives.push_back(make_pair(sample, argmax));
 
                             if (negatives.size() == maxNegatives)
-                                return;
+                                return false;
                         }
                     }
                 }
             }
         }
     }
+    return true;
 }
 
 namespace FFLD
@@ -1044,6 +1044,8 @@ double Mixture::train(const vector<pair<Model, int> > & positives,
 					  const vector<pair<Model, int> > & negatives, double C, double J,
 					  int maxIterations)
 {
+	cout << "Training LBFGS - Positives: " << positives.size() << ", Negatives: " << negatives.size() << endl;
+
 	detail::Loss loss(models_, positives, negatives, C, J, maxIterations);
 	LBFGS lbfgs(&loss, 0.001, maxIterations, 20, 20);
 	

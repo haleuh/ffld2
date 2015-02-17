@@ -166,7 +166,7 @@ private:
                                  const int padx, const int pady, const int interval, const double overlap,
     							 std::vector<std::pair<Model, int> > & positives) const;
 
-    void scorePositiveScene(const JPEGImage image, const std::vector<Object> objects,
+    bool scorePositiveScene(const JPEGImage image, const std::vector<Object> objects,
                             const int padx, const int pady, const int interval, double overlap,
                             std::vector<std::pair<Model, int> > & positives) const;
 	
@@ -179,7 +179,7 @@ private:
                                  const int padx, const int pady, const int interval, const int maxNegatives,
     							 std::vector<std::pair<Model, int> > & negatives) const;
 
-    void scoreNegativeScene(const JPEGImage image, const std::vector<Object> objects, const int scene_index,
+    bool scoreNegativeScene(const JPEGImage image, const std::vector<Object> objects, const int scene_index,
                             const int nbCached, const int padx, const int pady, const int interval, const int maxNegatives,
                             std::vector<std::pair<Model, int> > & negatives, int current_count) const;
 	
