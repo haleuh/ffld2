@@ -234,10 +234,9 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
         return false;
 
     // If we've been given an empty model, then pre-train first
-	if (mixture.empty())
-	    mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
-	                          interval, nbRelabel / 2.0, nbDatamine,
-	                          maxNegatives, C, J, overlap);
+    mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
+                          interval, nbRelabel / 2.0, nbDatamine,
+                          maxNegatives, C, J, overlap);
 
 	if (mixture.models()[0].parts().size() == 1)
 		mixture.initializeParts(8, std::make_pair(6, 6));
@@ -245,6 +244,5 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
 	mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
 	                      interval, nbRelabel, nbDatamine, maxNegatives, C, J,
 				          overlap);
-
 	return true;
 }
