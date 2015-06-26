@@ -470,7 +470,7 @@ void Mixture::cacheFilters() const
 	
 	for (unsigned int i = 0, j = 0; i < models_.size(); ++i) {
 #pragma omp parallel for
-		for (unsigned int k = 0; k < models_[i].parts().size(); ++k)
+		for (int k = 0; k < static_cast<int>(models_[i].parts().size()); ++k)
 			Patchwork::TransformFilter(models_[i].parts()[k].filter, filterCache_[j + k]);
 		
 		j += models_[i].parts().size();
@@ -880,7 +880,7 @@ public:
 		vector<double> posMargins(positives_.size());
 		
 #pragma omp parallel for
-		for (unsigned int i = 0; i < positives_.size(); ++i)
+		for (int i = 0; i < static_cast<int>(positives_.size()); ++i)
 			posMargins[i] = models_[positives_[i].second].dot(positives_[i].first);
 		
 		for (unsigned int i = 0; i < positives_.size(); ++i) {
@@ -905,7 +905,7 @@ public:
 		vector<double> negMargins(negatives_.size());
 		
 #pragma omp parallel for
-		for (unsigned int i = 0; i < negatives_.size(); ++i)
+		for (int i = 0; i < static_cast<int>(negatives_.size()); ++i)
 			negMargins[i] = models_[negatives_[i].second].dot(negatives_[i].first);
 		
 		for (unsigned int i = 0; i < negatives_.size(); ++i) {

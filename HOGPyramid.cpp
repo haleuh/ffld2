@@ -122,7 +122,7 @@ void HOGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) c
 	convolutions.resize(levels_.size());
 	
 #pragma omp parallel for
-	for (unsigned int i = 0; i < levels_.size(); ++i)
+	for (int i = 0; i < static_cast<int>(levels_.size()); ++i)
 		Convolve(levels_[i], filter, convolutions[i]);
 }
 

@@ -314,7 +314,7 @@ void detect(const Mixture & mixture, int width, int height, const HOGPyramid & p
 	// Print the detections
 	if (out) {
 #pragma omp critical
-		for (int i = 0; i < detections.size(); ++i) {
+		for (int i = 0; i < static_cast<int>(detections.size()); ++i) {
 			bool positive = false;
 			
 			if (scene) {
@@ -663,7 +663,7 @@ int main(int argc, char ** argv)
 		// threading
 		int i;
 #pragma omp parallel for private(i)
-		for (i = 0; i < scenes.size(); ++i) {
+		for (i = 0; i < static_cast<int>(scenes.size()); ++i) {
 			JPEGImage image(scenes[i].filename());
 			HOGPyramid pyramid(image, padding, padding, interval);
 			vector<Detection> detections;
@@ -681,7 +681,7 @@ int main(int argc, char ** argv)
 			
 #pragma omp critical
 			{
-				for (int j = 0; j < detections.size(); ++j) {
+				for (int j = 0; j < static_cast<int>(detections.size()); ++j) {
 					// Find the most overlapped object with the same label
 					Intersector intersector(detections[j]);
 					double maxScore = 0.0;
