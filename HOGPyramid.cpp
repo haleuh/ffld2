@@ -122,7 +122,7 @@ void HOGPyramid::convolve(const Level & filter, vector<Matrix> & convolutions) c
 	convolutions.resize(levels_.size());
 	
 #pragma omp parallel for
-	for (int i = 0; i < levels_.size(); ++i)
+	for (unsigned int i = 0; i < levels_.size(); ++i)
 		Convolve(levels_[i], filter, convolutions[i]);
 }
 
@@ -498,11 +498,11 @@ ostream & FFLD::operator<<(ostream & os, const HOGPyramid & pyramid)
 	os << pyramid.padx() << ' ' << pyramid.pady() << ' ' << pyramid.interval() << ' '
 	   << pyramid.levels().size() << endl;
 	
-	for (int i = 0; i < pyramid.levels().size(); ++i) {
+	for (unsigned int i = 0; i < pyramid.levels().size(); ++i) {
 		os << pyramid.levels()[i].rows() << ' ' << pyramid.levels()[i].cols() << ' '
 		   << HOGPyramid::NbFeatures << ' ';
 		
-		for (int y = pyramid.pady(); y < pyramid.levels()[i].rows() - pyramid.pady(); ++y)
+		for (unsigned int y = pyramid.pady(); y < pyramid.levels()[i].rows() - pyramid.pady(); ++y)
 			os.write(reinterpret_cast<const char *>(pyramid.levels()[i].row(y).data() +
 													pyramid.padx()),
 					 (pyramid.levels()[i].cols() - 2 * pyramid.padx()) * sizeof(HOGPyramid::Cell));

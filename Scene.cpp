@@ -241,7 +241,7 @@ ostream & FFLD::operator<<(ostream & os, const Scene & scene)
 	os << scene.width() << ' ' << scene.height() << ' ' << scene.depth() << ' '
 	   << scene.objects().size() << ' ' << scene.filename() << endl;
 	
-	for (int i = 0; i < scene.objects().size(); ++i)
+	for (unsigned int i = 0; i < scene.objects().size(); ++i)
 		os << scene.objects()[i] << endl;
 	
 	return os;
@@ -304,7 +304,7 @@ ostream & FFLD::operator<<(ostream & os, const InMemoryScene & scene)
 	os << scene.width() << ' ' << scene.height() << ' ' << scene.depth() << ' '
 	   << scene.objects().size() << ' ' << scene.image() << endl;
 
-	for (int i = 0; i < scene.objects().size(); ++i)
+	for (unsigned int i = 0; i < scene.objects().size(); ++i)
 		os << scene.objects()[i] << endl;
 
 	return os;

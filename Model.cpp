@@ -587,12 +587,12 @@ double Model::dot(const Model & sample) const
 	if (parts_.size() != sample.parts_.size())
 		return numeric_limits<double>::quiet_NaN();
 	
-	for (int i = 0; i < parts_.size(); ++i) {
+	for (unsigned int i = 0; i < parts_.size(); ++i) {
 		if ((parts_[i].filter.rows() != sample.parts_[i].filter.rows()) ||
 			(parts_[i].filter.cols() != sample.parts_[i].filter.cols()))
 			return numeric_limits<double>::quiet_NaN();
 		
-		for (int y = 0; y < parts_[i].filter.rows(); ++y)
+		for (unsigned int y = 0; y < parts_[i].filter.rows(); ++y)
 			d += HOGPyramid::Map(parts_[i].filter).row(y).dot(
 					HOGPyramid::Map(sample.parts_[i].filter).row(y));
 		
@@ -607,7 +607,7 @@ double Model::norm() const
 {
 	double n = 0.0;
 	
-	for (int i = 0; i < parts_.size(); ++i) {
+	for (unsigned int i = 0; i < parts_.size(); ++i) {
 		n += HOGPyramid::Map(parts_[i].filter).squaredNorm();
 		
 		if (i)
@@ -624,7 +624,7 @@ Model & Model::operator+=(const Model & sample)
 	
 	Model copy(*this);
 	
-	for (int i = 0; i < parts_.size(); ++i) {
+	for (unsigned int i = 0; i < parts_.size(); ++i) {
 		if ((parts_[i].filter.rows() != sample.parts_[i].filter.rows()) ||
 			(parts_[i].filter.cols() != sample.parts_[i].filter.cols())) {
 			*this = copy; // Restore the copy
@@ -647,7 +647,7 @@ Model & Model::operator-=(const Model & sample)
 	
 	Model copy(*this);
 	
-	for (int i = 0; i < parts_.size(); ++i) {
+	for (unsigned int i = 0; i < parts_.size(); ++i) {
 		if ((parts_[i].filter.rows() != sample.parts_[i].filter.rows()) ||
 			(parts_[i].filter.cols() != sample.parts_[i].filter.cols())) {
 			*this = copy; // Restore the copy
@@ -665,7 +665,7 @@ Model & Model::operator-=(const Model & sample)
 
 Model & Model::operator*=(double a)
 {
-	for (int i = 0; i < parts_.size(); ++i) {
+	for (unsigned int i = 0; i < parts_.size(); ++i) {
 		HOGPyramid::Map(parts_[i].filter) *= a;
 		parts_[i].deformation *= a;
 	}
@@ -688,7 +688,7 @@ Model Model::flip() const
 		model.parts_[0].deformation = parts_[0].deformation;
 		
 		// Flip the parts
-		for (int i = 1; i < parts_.size(); ++i) {
+		for (unsigned int i = 1; i < parts_.size(); ++i) {
 			model.parts_[i].filter = HOGPyramid::Flip(parts_[i].filter);
 			model.parts_[i].offset(0) = 2 * static_cast<int>(parts_[0].filter.cols()) -
 										static_cast<int>(parts_[i].filter.cols()) -
@@ -833,7 +833,7 @@ ostream & FFLD::operator<<(ostream & os, const Model & model)
 	os << model.parts().size() << ' ' << model.bias() << endl;
 	
 	// Save the parts themselves
-	for (int i = 0; i < model.parts().size(); ++i) {
+	for (unsigned int i = 0; i < model.parts().size(); ++i) {
 		os << model.parts()[i].filter.rows() << ' ' << model.parts()[i].filter.cols() << ' '
 		   << HOGPyramid::NbFeatures << ' ' << model.parts()[i].offset(0) << ' '
 		   << model.parts()[i].offset(1) << ' ' << model.parts()[i].offset(2) << ' '

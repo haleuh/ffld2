@@ -92,7 +92,7 @@ static int blf(vector<pair<Rectangle, int> > & rectangles, int maxWidth, int max
 	// returns -1
 	vector<int> ordering(rectangles.size());
 	
-	for (int i = 0; i < rectangles.size(); ++i) {
+	for (unsigned int i = 0; i < rectangles.size(); ++i) {
 		if ((rectangles[i].first.width() > maxWidth) || (rectangles[i].first.height() > maxHeight))
 			return -1;
 		
@@ -102,19 +102,19 @@ static int blf(vector<pair<Rectangle, int> > & rectangles, int maxWidth, int max
 	sort(ordering.begin(), ordering.end(), detail::AreaComparator(rectangles));
 	
 	// Index of the plane containing each rectangle
-	for (int i = 0; i < rectangles.size(); ++i)
+	for (unsigned int i = 0; i < rectangles.size(); ++i)
 		rectangles[i].second = -1;
 	
 	vector<set<Rectangle, detail::PositionComparator> > gaps;
 	
 	// Insert each rectangle in the first gap big enough
-	for (int i = 0; i < rectangles.size(); ++i) {
+	for (unsigned int i = 0; i < rectangles.size(); ++i) {
 		pair<Rectangle, int> & rect = rectangles[ordering[i]];
 		
 		// Find the first gap big enough
 		set<Rectangle, detail::PositionComparator>::iterator g;
 		
-		for (int i = 0; (rect.second == -1) && (i < gaps.size()); ++i) {
+		for (unsigned int i = 0; (rect.second == -1) && (i < gaps.size()); ++i) {
 			for (g = gaps[i].begin(); g != gaps[i].end(); ++g) {
 				if ((g->width() >= rect.first.width()) && (g->height() >= rect.first.height())) {
 					rect.second = i;

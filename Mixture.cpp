@@ -78,7 +78,7 @@ pair<int, int> Mixture::minSize() const
 	if (!models_.empty()) {
 		size = models_[0].rootSize();
 		
-		for (int i = 1; i < models_.size(); ++i) {
+		for (unsigned int i = 1; i < models_.size(); ++i) {
 			size.first = min(size.first, models_[i].rootSize().first);
 			size.second = min(size.second, models_[i].rootSize().second);
 		}
@@ -94,7 +94,7 @@ pair<int, int> Mixture::maxSize() const
 	if (!models_.empty()) {
 		size = models_[0].rootSize();
 		
-		for (int i = 1; i < models_.size(); ++i) {
+		for (unsigned int i = 1; i < models_.size(); ++i) {
 			size.first = max(size.first, models_[i].rootSize().first);
 			size.second = max(size.second, models_[i].rootSize().second);
 		}
@@ -142,7 +142,7 @@ double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx,
 			// Remove easy samples (keep hard ones)
 			int j = 0;
 			
-			for (int i = 0; i < negatives.size(); ++i)
+			for (unsigned int i = 0; i < negatives.size(); ++i)
 				if ((negatives[i].first.parts()[0].deformation(3) =
 					 models_[negatives[i].second].dot(negatives[i].first)) > -1.01)
 					negatives[j++] = negatives[i];
@@ -159,7 +159,7 @@ double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx,
 			// Merge the left / right samples for more efficient training
 			vector<int> posComponents(positives.size());
 			
-			for (int i = 0; i < positives.size(); ++i) {
+			for (unsigned int i = 0; i < positives.size(); ++i) {
 				posComponents[i] = positives[i].second;
 				
 				if (positives[i].second & 1)
@@ -170,7 +170,7 @@ double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx,
 			
 			vector<int> negComponents(negatives.size());
 			
-			for (int i = 0; i < negatives.size(); ++i) {
+			for (unsigned int i = 0; i < negatives.size(); ++i) {
 				negComponents[i] = negatives[i].second;
 				
 				if (negatives[i].second & 1)
@@ -180,7 +180,7 @@ double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx,
 			}
 			
 			// Merge the left / right models for more efficient training
-			for (int i = 1; i < models_.size() / 2; ++i)
+			for (unsigned int i = 1; i < models_.size() / 2; ++i)
 				models_[i] = models_[i * 2];
 			
 			models_.resize(models_.size() / 2);
@@ -196,14 +196,14 @@ double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx,
 				 << negatives.size() << ", loss (cache): " << loss << endl;
 			
 			// Unmerge the left / right samples
-			for (int i = 0; i < positives.size(); ++i) {
+			for (unsigned int i = 0; i < positives.size(); ++i) {
 				positives[i].second = posComponents[i];
 				
 				if (positives[i].second & 1)
 					positives[i].first = positives[i].first.flip();
 			}
 			
-			for (int i = 0; i < negatives.size(); ++i) {
+			for (unsigned int i = 0; i < negatives.size(); ++i) {
 				negatives[i].second = negComponents[i];
 				
 				if (negatives[i].second & 1)
@@ -282,7 +282,7 @@ double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
 			// Remove easy samples (keep hard ones)
 			int j = 0;
 
-			for (int i = 0; i < negatives.size(); ++i)
+			for (unsigned int i = 0; i < negatives.size(); ++i)
 				if ((negatives[i].first.parts()[0].deformation(3) =
 					 models_[negatives[i].second].dot(negatives[i].first)) > -1.01)
 					negatives[j++] = negatives[i];
@@ -299,7 +299,7 @@ double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
 			// Merge the left / right samples for more efficient training
 			vector<int> posComponents(positives.size());
 
-			for (int i = 0; i < positives.size(); ++i) {
+			for (unsigned int i = 0; i < positives.size(); ++i) {
 				posComponents[i] = positives[i].second;
 
 				if (positives[i].second & 1)
@@ -310,7 +310,7 @@ double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
 
 			vector<int> negComponents(negatives.size());
 
-			for (int i = 0; i < negatives.size(); ++i) {
+			for (unsigned int i = 0; i < negatives.size(); ++i) {
 				negComponents[i] = negatives[i].second;
 
 				if (negatives[i].second & 1)
@@ -320,7 +320,7 @@ double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
 			}
 
 			// Merge the left / right models for more efficient training
-			for (int i = 1; i < models_.size() / 2; ++i)
+			for (unsigned int i = 1; i < models_.size() / 2; ++i)
 				models_[i] = models_[i * 2];
 
 			models_.resize(models_.size() / 2);
@@ -336,14 +336,14 @@ double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
 				 << negatives.size() << ", loss (cache): " << loss << endl;
 
 			// Unmerge the left / right samples
-			for (int i = 0; i < positives.size(); ++i) {
+			for (unsigned int i = 0; i < positives.size(); ++i) {
 				positives[i].second = posComponents[i];
 
 				if (positives[i].second & 1)
 					positives[i].first = positives[i].first.flip();
 			}
 
-			for (int i = 0; i < negatives.size(); ++i) {
+			for (unsigned int i = 0; i < negatives.size(); ++i) {
 				negatives[i].second = negComponents[i];
 
 				if (negatives[i].second & 1)
@@ -381,7 +381,7 @@ double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
 
 void Mixture::initializeParts(int nbParts, pair<int, int> partSize)
 {
-	for (int i = 0; i < models_.size(); i += 2) {
+	for (unsigned int i = 0; i < models_.size(); i += 2) {
 		models_[i].initializeParts(nbParts, partSize);
 		models_[i + 1] = models_[i].flip();
 	}
@@ -462,15 +462,15 @@ void Mixture::cacheFilters() const
 	// Count the number of filters
 	int nbFilters = 0;
 	
-	for (int i = 0; i < models_.size(); ++i)
+	for (unsigned int i = 0; i < models_.size(); ++i)
 		nbFilters += models_[i].parts().size();
 	
 	// Transform all the filters
 	filterCache_.resize(nbFilters);
 	
-	for (int i = 0, j = 0; i < models_.size(); ++i) {
+	for (unsigned int i = 0, j = 0; i < models_.size(); ++i) {
 #pragma omp parallel for
-		for (int k = 0; k < models_[i].parts().size(); ++k)
+		for (unsigned int k = 0; k < models_[i].parts().size(); ++k)
 			Patchwork::TransformFilter(models_[i].parts()[k].filter, filterCache_[j + k]);
 		
 		j += models_[i].parts().size();
@@ -509,10 +509,10 @@ void Mixture::posLatentSearch(const vector<Scene> & scenes, const Object::Name n
 	
 	positives.clear();
 	
-	for (int i = 0; i < scenes.size(); ++i) {
+	for (unsigned int i = 0; i < scenes.size(); ++i) {
 	    vector<Object> positive_objects;
 		
-		for (int j = 0; j < scenes[i].objects().size(); ++j)
+		for (unsigned int j = 0; j < scenes[i].objects().size(); ++j)
 			if ((scenes[i].objects()[j].name() == name) && !scenes[i].objects()[j].difficult())
 				positive_objects.push_back(scenes[i].objects()[j]);
 
@@ -545,7 +545,7 @@ void Mixture::posLatentSearchInMemory(const vector<InMemoryScene> & scenes,
 
 	positives.clear();
 
-	for (int i = 0; i < scenes.size(); ++i) {
+	for (unsigned int i = 0; i < scenes.size(); ++i) {
 
 		if (scenes[i].image().empty()) {
 			positives.clear();
@@ -578,7 +578,7 @@ bool Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> obj
 
     // For each object, set as positive the best (highest score or else most intersecting)
     // position
-    for (int j = 0; j < objects.size(); ++j) {
+    for (unsigned int j = 0; j < objects.size(); ++j) {
         const Intersector intersector(objects[j].bndbox(), overlap);
 
         // The model, level, position, score, and intersection of the best example
@@ -589,7 +589,7 @@ bool Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> obj
         double maxScore = -numeric_limits<double>::infinity();
         double maxInter = 0.0;
 
-        for (int z = 0; z < pyramid.levels().size(); ++z) {
+        for (unsigned int z = 0; z < pyramid.levels().size(); ++z) {
             const double scale = pow(2.0, static_cast<double>(z) / interval + 2);
             int rows = 0;
             int cols = 0;
@@ -611,7 +611,7 @@ bool Mixture::scorePositiveScene(const JPEGImage image, const vector<Object> obj
 
                     // Try all models and keep the most intersecting one
                     if (zero_) {
-                        for (int k = 0; k < models_.size(); ++k) {
+                        for (unsigned int k = 0; k < models_.size(); ++k) {
                             // The bounding box of the model at this position
                             Rectangle bndbox;
                             bndbox.setX((x - padx) * scale + 0.5);
@@ -706,8 +706,8 @@ void Mixture::negLatentSearch(const vector<Scene> & scenes, const Object::Name n
 	// The number of negatives already in the cache
 	const int nbCached = static_cast<int>(negatives.size());
 	
-	for (int i = 0, j = 0; i < scenes.size(); ++i) {
-		for (int k = 0; k < scenes[i].objects().size(); ++k)
+	for (unsigned int i = 0, j = 0; i < scenes.size(); ++i) {
+		for (unsigned int k = 0; k < scenes[i].objects().size(); ++k)
 			if (scenes[i].objects()[k].name() == name)
 				continue;
 		
@@ -740,7 +740,7 @@ void Mixture::negLatentSearchInMemory(const vector<InMemoryScene> & scenes,
 	// The number of negatives already in the cache
     const int nbCached = static_cast<int>(negatives.size());
 
-    for (int i = 0, j = 0; i < scenes.size(); ++i) {
+    for (unsigned int i = 0, j = 0; i < scenes.size(); ++i) {
 
         if (scenes[i].image().empty()) {
             negatives.clear();
@@ -754,10 +754,10 @@ void Mixture::negLatentSearchInMemory(const vector<InMemoryScene> & scenes,
     }
 }
 
-bool Mixture::scoreNegativeScene(const JPEGImage image, const int scene_index,
+bool Mixture::scoreNegativeScene(const JPEGImage image, const unsigned int scene_index,
                                  const int nbCached, const int padx,
                                  const int pady, const int interval, const int maxNegatives,
-                                 vector<pair<Model, int> > & negatives, int &current_count) const
+                                 vector<pair<Model, int> > & negatives, unsigned int &current_count) const
 {
     const HOGPyramid pyramid(image, padx, pady, interval);
 
@@ -773,7 +773,7 @@ bool Mixture::scoreNegativeScene(const JPEGImage image, const int scene_index,
     if (!zero_)
         convolve(pyramid, scores, argmaxes, &positions);
 
-    for (int z = 0; z < pyramid.levels().size(); ++z) {
+    for (unsigned int z = 0; z < pyramid.levels().size(); ++z) {
         int rows = 0;
         int cols = 0;
 
@@ -844,8 +844,8 @@ public:
 	{
 		int d = 0;
 		
-		for (int i = 0; i < models_.size(); ++i) {
-			for (int j = 0; j < models_[i].parts().size(); ++j) {
+		for (unsigned int i = 0; i < models_.size(); ++i) {
+			for (unsigned int j = 0; j < models_[i].parts().size(); ++j) {
 				d += models_[i].parts()[j].filter.size() * HOGPyramid::NbFeatures; // Filter
 				
 				if (j)
@@ -871,7 +871,7 @@ public:
 		if (g) {
 			gradients.resize(models_.size());
 			
-			for (int i = 0; i < models_.size(); ++i)
+			for (unsigned int i = 0; i < models_.size(); ++i)
 				gradients[i] = Model(models_[i].rootSize(),
 									 static_cast<int>(models_[i].parts().size()) - 1,
 									 models_[i].partSize());
@@ -880,10 +880,10 @@ public:
 		vector<double> posMargins(positives_.size());
 		
 #pragma omp parallel for
-		for (int i = 0; i < positives_.size(); ++i)
+		for (unsigned int i = 0; i < positives_.size(); ++i)
 			posMargins[i] = models_[positives_[i].second].dot(positives_[i].first);
 		
-		for (int i = 0; i < positives_.size(); ++i) {
+		for (unsigned int i = 0; i < positives_.size(); ++i) {
 			if (posMargins[i] < 1.0) {
 				loss += 1.0 - posMargins[i];
 				
@@ -897,7 +897,7 @@ public:
 			loss *= J_;
 			
 			if (g) {
-				for (int i = 0; i < models_.size(); ++i)
+				for (unsigned int i = 0; i < models_.size(); ++i)
 					gradients[i] *= J_;
 			}
 		}
@@ -905,10 +905,10 @@ public:
 		vector<double> negMargins(negatives_.size());
 		
 #pragma omp parallel for
-		for (int i = 0; i < negatives_.size(); ++i)
+		for (unsigned int i = 0; i < negatives_.size(); ++i)
 			negMargins[i] = models_[negatives_[i].second].dot(negatives_[i].first);
 		
-		for (int i = 0; i < negatives_.size(); ++i) {
+		for (unsigned int i = 0; i < negatives_.size(); ++i) {
 			if (negMargins[i] > -1.0) {
 				loss += 1.0 + negMargins[i];
 				
@@ -921,7 +921,7 @@ public:
 		double maxNorm = 0.0;
 		int argNorm = 0;
 		
-		for (int i = 0; i < models_.size(); ++i) {
+		for (unsigned int i = 0; i < models_.size(); ++i) {
 			if (g)
 				gradients[i] *= C_;
 			
@@ -939,7 +939,7 @@ public:
 			gradients[argNorm] += models_[argNorm];
 			
 			// Regularize the deformation 10 times more
-			for (int i = 1; i < gradients[argNorm].parts().size(); ++i)
+			for (unsigned int i = 1; i < gradients[argNorm].parts().size(); ++i)
 				gradients[argNorm].parts()[i].deformation +=
 					9.0 * models_[argNorm].parts()[i].deformation;
 			
@@ -947,8 +947,8 @@ public:
 			gradients[argNorm].bias() -= models_[argNorm].bias();
 			
 			// In case minimum constraints were applied
-			for (int i = 0; i < models_.size(); ++i) {
-				for (int j = 1; j < models_[i].parts().size(); ++j) {
+			for (unsigned int i = 0; i < models_.size(); ++i) {
+				for (unsigned int j = 1; j < models_[i].parts().size(); ++j) {
 					if (models_[i].parts()[j].deformation(0) >= -0.005)
 						gradients[i].parts()[j].deformation(0) =
 							max(gradients[i].parts()[j].deformation(0), 0.0);
@@ -971,8 +971,8 @@ public:
 	
 	static void ToModels(const double * x, vector<Model> & models)
 	{
-		for (int i = 0, j = 0; i < models.size(); ++i) {
-			for (int k = 0; k < models[i].parts().size(); ++k) {
+		for (unsigned int i = 0, j = 0; i < models.size(); ++i) {
+			for (unsigned int k = 0; k < models[i].parts().size(); ++k) {
 				const int nbFeatures = static_cast<int>(models[i].parts()[k].filter.size()) *
 									   HOGPyramid::NbFeatures;
 				
@@ -1001,8 +1001,8 @@ public:
 	
 	static void FromModels(const vector<Model> & models, double * x)
 	{
-		for (int i = 0, j = 0; i < models.size(); ++i) {
-			for (int k = 0; k < models[i].parts().size(); ++k) {
+		for (unsigned int i = 0, j = 0; i < models.size(); ++i) {
+			for (unsigned int k = 0; k < models[i].parts().size(); ++k) {
 				const int nbFeatures = static_cast<int>(models[i].parts()[k].filter.size()) *
 									   HOGPyramid::NbFeatures;
 				
@@ -1114,7 +1114,7 @@ void Mixture::convolve(const HOGPyramid & pyramid,
 	for (int i = 0; i < nbModels; ++i) {
 		vector<vector<HOGPyramid::Matrix> > tmp(models_[i].parts().size());
 		
-		for (int j = 0; j < tmp.size(); ++j)
+		for (unsigned int j = 0; j < tmp.size(); ++j)
 			tmp[j].swap(convolutions[offsets[i] + j]);
 		
 		models_[i].convolve(pyramid, scores[i], positions ? &(*positions)[i] : 0, &tmp);
@@ -1145,7 +1145,7 @@ vector<pair<int, int> > Mixture::FilterSizes(const int nbComponents, const vecto
 	// Sort the aspect ratio of all the (non difficult) samples
 	vector<double> ratios;
 
-	for (int j = 0; j < positive_objects.size(); ++j) {
+	for (unsigned int j = 0; j < positive_objects.size(); ++j) {
         const Object & obj = positive_objects[j];
         ratios.push_back(static_cast<double>(obj.bndbox().width()) / obj.bndbox().height());
     }
@@ -1166,7 +1166,7 @@ vector<pair<int, int> > Mixture::FilterSizes(const int nbComponents, const vecto
 	// Store the areas of the objects associated to each component
 	vector<vector<int> > areas(nbComponents);
 
-	for (int j = 0; j < positive_objects.size(); ++j) {
+	for (unsigned int j = 0; j < positive_objects.size(); ++j) {
         const Object & obj = positive_objects[j];
         const double r = static_cast<double>(obj.bndbox().width()) / obj.bndbox().height();
 
@@ -1211,7 +1211,7 @@ void Mixture::Cluster(int nbComponents, vector<pair<Model, int> > & samples)
 		vector<int> permutation;
 		
 		// For each positive
-		for (int j = 0; j < samples.size(); ++j)
+		for (unsigned int j = 0; j < samples.size(); ++j)
 			if (samples[j].second / 2 == i)
 				permutation.push_back(j);
 		
@@ -1229,7 +1229,7 @@ void Mixture::Cluster(int nbComponents, vector<pair<Model, int> > & samples)
 			vector<bool> assignment(permutation.size(), false);
 			Model left = samples[permutation[0]].first;
 			
-			for (int k = 1; k < permutation.size(); ++k) {
+			for (unsigned int k = 1; k < permutation.size(); ++k) {
 				const Model & positive = samples[permutation[k]].first;
 				
 				if (positive.dot(left) > positive.dot(left.flip())) {
@@ -1246,11 +1246,11 @@ void Mixture::Cluster(int nbComponents, vector<pair<Model, int> > & samples)
 			const Model right = left.flip();
 			double dots = 0.0;
 			
-			for (int k = 0; k < permutation.size(); ++k)
+			for (unsigned int k = 0; k < permutation.size(); ++k)
 				dots += samples[permutation[k]].first.dot(assignment[k] ? right : left);
 			
 			if (dots > best) {
-				for (int k = 0; k < permutation.size(); ++k)
+				for (unsigned int k = 0; k < permutation.size(); ++k)
 					samples[permutation[k]].second = 2 * i + assignment[k];
 				
 				best = dots;
@@ -1265,7 +1265,7 @@ ostream & FFLD::operator<<(ostream & os, const Mixture & mixture)
 	os << mixture.models().size() << endl;
 	
 	// Save the models themselves
-	for (int i = 0; i < mixture.models().size(); ++i)
+	for (unsigned int i = 0; i < mixture.models().size(); ++i)
 		os << mixture.models()[i] << endl;
 	
 	return os;

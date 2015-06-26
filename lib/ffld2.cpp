@@ -33,12 +33,12 @@ void detect(const Mixture & mixture, const unsigned char* image_array,
     // Cache the size of the models
     std::vector<std::pair<int, int> > sizes(mixture.models().size());
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (unsigned int i = 0; i < sizes.size(); ++i) {
         sizes[i] = mixture.models()[i].rootSize();
     }
 
     // For each scale
-    for (int z = 0; z < scores.size(); ++z) {
+    for (unsigned int z = 0; z < scores.size(); ++z) {
         const double scale = pow(2.0, static_cast<double>(z) / pyramid.interval() + 2);
 
         const int rows = static_cast<int>(scores[z].rows());
@@ -82,7 +82,7 @@ void detect(const Mixture & mixture, const unsigned char* image_array,
     // Non maxima suppression
     sort(detections.begin(), detections.end());
 
-    for (int i = 1; i < detections.size(); ++i)
+    for (unsigned int i = 1; i < detections.size(); ++i)
         detections.resize(remove_if(detections.begin() + i, detections.end(),
                                     Intersector(detections[i - 1], overlap, true)) -
                           detections.begin());
@@ -151,12 +151,12 @@ bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
 	int maxRows = 0;
 	int maxCols = 0;
 
-	for(int i = 0; i < positive_scenes.size(); i++) {
+	for(unsigned int i = 0; i < positive_scenes.size(); i++) {
 	    Scene scene = positive_scenes[i];
         maxRows = std::max(maxRows, (scene.height() + 3) / 4 + pady);
         maxCols = std::max(maxCols, (scene.width() + 3) / 4 + padx);
 	}
-    for(int i = 0; i < negative_scenes.size(); i++) {
+    for(unsigned int i = 0; i < negative_scenes.size(); i++) {
         Scene scene = negative_scenes[i];
         maxRows = std::max(maxRows, (scene.height() + 3) / 4 + pady);
         maxCols = std::max(maxCols, (scene.width() + 3) / 4 + padx);
