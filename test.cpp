@@ -558,7 +558,7 @@ int main(int argc, char ** argv)
 		start();
 		
 		if (!Patchwork::InitFFTW((pyramid.levels()[0].rows() - padding + 15) & ~15,
-								 (pyramid.levels()[0].cols() - padding + 15) & ~15)) {
+			        	 (pyramid.levels()[0].cols() - padding + 15) & ~15, true)) {
 			cerr << "\nCould not initialize the Patchwork class" << endl;
 			return -1;
 		}
@@ -629,7 +629,7 @@ int main(int argc, char ** argv)
 		// Initialize the Patchwork class
 		start();
 		
-		if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15)) {
+		if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15, true)) {
 			cerr << "\nCould not initialize the Patchwork class" << endl;
 			return -1;
 		}

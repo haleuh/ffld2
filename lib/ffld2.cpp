@@ -2,9 +2,17 @@
 
 using namespace FFLD;
 
+
+bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
+                         const std::vector<InMemoryScene> negative_scenes,
+                         const int padx, const int pady,
+                         const bool cacheWisdom);
+
+
 void detect(const Mixture & mixture, const unsigned char* image_array,
             const int width, const int height, const int n_channels,
             const int padding, const int interval, const double threshold,
+            const bool cacheWisdom,
             const double overlap, std::vector<Detection> & detections) {
 
     JPEGImage image(width, height, n_channels, image_array);
@@ -17,7 +25,8 @@ void detect(const Mixture & mixture, const unsigned char* image_array,
 
     // Couldn't initialize FFTW
     if (!Patchwork::InitFFTW((pyramid.levels()[0].rows() - padding + 15) & ~15,
-                             (pyramid.levels()[0].cols() - padding + 15) & ~15)) {
+                             (pyramid.levels()[0].cols() - padding + 15) & ~15,
+                             cacheWisdom)) {
         return;
     }
 
@@ -92,7 +101,8 @@ void detect(const std::string mixture_filepath,
             const unsigned char* image_array,
             const int width, const int height, const int n_channels,
             const int padding, const int interval, const double threshold,
-            const double overlap, std::vector<Detection> & detections) {
+            const bool cacheWisdom, const double overlap, 
+            std::vector<Detection> & detections) {
 
     // Failed to load mixture model
     Mixture mixture;
@@ -100,14 +110,15 @@ void detect(const std::string mixture_filepath,
         return;
 
     detect(mixture, image_array, width, height, n_channels, padding, interval,
-           threshold, overlap, detections);
+           threshold, cacheWisdom, overlap, detections);
 }
 
 void detect(const char* mixture_data,
             const unsigned char* image_array,
             const int width, const int height, const int n_channels,
-            const int padding, const int interval, const double threshold,
-            const double overlap, std::vector<Detection> & detections) {
+            const int padding, const int interval, const double threshold, 
+            const bool cacheWisdom, const double overlap, 
+            std::vector<Detection> & detections) {
 
     // Failed to load mixture model
     Mixture mixture;
@@ -115,7 +126,7 @@ void detect(const char* mixture_data,
         return;
 
     detect(mixture, image_array, width, height, n_channels, padding, interval,
-           threshold, overlap, detections);
+           threshold, cacheWisdom, overlap, detections);
 }
 
 bool load_mixture_model(const std::string filepath,
@@ -146,7 +157,8 @@ bool save_mixture_model(const std::string filepath,
 
 bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
                          const std::vector<InMemoryScene> negative_scenes,
-                         const int padx, const int pady)
+                         const int padx, const int pady, 
+                         const bool cacheWisdom)
 {
 	int maxRows = 0;
 	int maxCols = 0;
@@ -166,7 +178,7 @@ bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
     //nbNegativeScenes -= negative_scenes.size();
 
 	// Initialize the Patchwork class
-	if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15)) {
+	if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15, cacheWisdom)) {
 		return false;
 	}
 	return true;
@@ -175,7 +187,7 @@ bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
 bool train(const std::vector<InMemoryScene> positive_scenes,
            const std::vector<InMemoryScene> negative_scenes,
            const int nbComponents,
-           const int padx, const int pady,
+           const int padx, const int pady, const bool cacheWisdom,
            const int interval, const int nbRelabel,
            const int nbDatamine, const int maxNegatives,
            const double C, const double J,
@@ -187,7 +199,7 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
     }
 
     // Initialize FFTW
-    if (!initializePatchWork(positive_scenes, negative_scenes, padx, pady))
+    if (!initializePatchWork(positive_scenes, negative_scenes, padx, pady, cacheWisdom))
         return false;
 
 	// The mixture to train
@@ -218,7 +230,7 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
 
 bool train(const std::vector<InMemoryScene> positive_scenes,
            const std::vector<InMemoryScene> negative_scenes,
-           const int padx, const int pady,
+           const int padx, const int pady, const int cacheWisdom,
            const int interval, const int nbRelabel,
            const int nbDatamine, const int maxNegatives,
            const double C, const double J,
@@ -230,7 +242,7 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
 	}
 
     // Initialize FFTW
-    if (!initializePatchWork(positive_scenes, negative_scenes, padx, pady))
+    if (!initializePatchWork(positive_scenes, negative_scenes, padx, pady, cacheWisdom))
         return false;
 
     // If we've been given an empty model, then pre-train first
@@ -243,6 +255,6 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
 
 	mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
 	                      interval, nbRelabel, nbDatamine, maxNegatives, C, J,
-				          overlap);
+                              overlap);
 	return true;
 }
