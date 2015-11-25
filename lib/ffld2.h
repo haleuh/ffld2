@@ -32,14 +32,15 @@ bool save_mixture_model(const std::string filepath, const FFLD::Mixture& mixture
 
 // Detect using a loaded model
 void detect(const FFLD::Mixture & mixture, const unsigned char* image,
-            const int width, const int height, const int n_channels, const int
-            padding, const int interval, const double threshold, const double
-            overlap, std::vector<Detection>& detections);
+            const int width, const int height, const int n_channels, const int padding, 
+            const int interval, const double threshold, const bool cacheWisdom,
+            const double overlap, std::vector<Detection>& detections);
 // Detect by loading model from filepath
 void detect(const std::string mixture_filepath, const unsigned char* image,
-            const int width, const int height, const int n_channels, const int
-            padding, const int interval, const double threshold, const double
-            overlap, std::vector<Detection>& detections);
+            const int width, const int height, const int n_channels, 
+            const int padding, const int interval, const double threshold, 
+            const bool cacheWisdom, const double overlap, 
+            std::vector<Detection>& detections);
 
 // Train using existing positive and negative scenes
 // Suggested parameter values taken from train.cpp:
@@ -49,7 +50,7 @@ void detect(const std::string mixture_filepath, const unsigned char* image,
 bool train(const std::vector<FFLD::InMemoryScene> positive_scenes,
            const std::vector<FFLD::InMemoryScene> negative_scenes,
            const int nbComponents,
-           const int padx, const int pady,
+           const int padx, const int pady, const bool cacheWisdom,
            const int interval, const int nbRelabel,
            const int nbDatamine, const int maxNegatives,
            const double C, const double J,
@@ -59,8 +60,9 @@ bool train(const std::vector<FFLD::InMemoryScene> positive_scenes,
 //      Mixture mixture(nbComponents, positive_scenes);
 bool train(const std::vector<FFLD::InMemoryScene> positive_scenes,
            const std::vector<FFLD::InMemoryScene> negative_scenes,
-           const int padx, const int pady,
+           const int padx, const int pady, const bool cacheWisdom,
            const int interval, const int nbRelabel,
            const int nbDatamine, const int maxNegatives,
            const double C, const double J,
            const double overlap, FFLD::Mixture& mixture);
+

@@ -325,7 +325,7 @@ int main(int argc, char * argv[])
 	}
 	
 	// Initialize the Patchwork class
-	if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15)) {
+	if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15, true)) {
 		cerr << "Error initializing the FFTW library" << endl;
 		return - 1;
 	}
