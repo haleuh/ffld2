@@ -230,7 +230,7 @@ bool train(const std::vector<InMemoryScene> positive_scenes,
 
 bool train(const std::vector<InMemoryScene> positive_scenes,
            const std::vector<InMemoryScene> negative_scenes,
-           const int padx, const int pady, const int cacheWisdom,
+           const int padx, const int pady, const bool cacheWisdom,
            const int interval, const int nbRelabel,
            const int nbDatamine, const int maxNegatives,
            const double C, const double J,
