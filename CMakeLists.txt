@@ -31,7 +31,7 @@ SET(HEADERS lib/ffld2.h HOGPyramid.h Intersector.h JPEGImage.h LBFGS.h Mixture.h
 SET(SOURCES lib/ffld2.cpp HOGPyramid.cpp JPEGImage.cpp LBFGS.cpp Mixture.cpp Model.cpp Object.cpp Patchwork.cpp Rectangle.cpp Scene.cpp)
 
 # Add a library version of the software that we can link against
-ADD_LIBRARY(ffld2 ${HEADERS} ${SOURCES} )
+ADD_LIBRARY(ffld2 SHARED ${HEADERS} ${SOURCES} )
 
 # Define the options
 IF(FFLD_HOGPYRAMID_DOUBLE)
