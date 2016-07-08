@@ -106,9 +106,9 @@ public:
 	/// @param[in] overlap Minimum overlap in latent positive search.
 	/// @returns The final SVM loss.
 	/// @note The magic constants come from Felzenszwalb's implementation.
-	double train(const std::vector<Scene> & scenes, Object::Name name, int padx = 12, int pady = 12,
+	/*double train(const std::vector<Scene> & scenes, Object::Name name, int padx = 12, int pady = 12,
 				 int interval = 5, int nbRelabel = 5, int nbDatamine = 10, int maxNegatives = 24000,
-				 double C = 0.002, double J = 2.0, double overlap = 0.7);
+				 double C = 0.002, double J = 2.0, double overlap = 0.7); */
 
     /// Trains the mixture using in-memory scenes of separate guaranteed positive and negative
     /// examples.
@@ -158,9 +158,9 @@ private:
     void init_models_with_sizes(const std::vector<std::pair<int, int> > sizes,
                                 const int nbComponents);
 	// Extracts all the positives
-	void posLatentSearch(const std::vector<Scene> & scenes, const Object::Name name,
+	/*void posLatentSearch(const std::vector<Scene> & scenes, const Object::Name name,
 						 const int padx, const int pady, const int interval, const double overlap,
-						 std::vector<std::pair<Model, int> > & positives) const;
+						 std::vector<std::pair<Model, int> > & positives) const; */
 
 	void posLatentSearchInMemory(const std::vector<InMemoryScene> & scenes,
                                  const int padx, const int pady, const int interval, const double overlap,
@@ -171,9 +171,9 @@ private:
                             std::vector<std::pair<Model, int> > & positives) const;
 	
 	// Bootstraps negatives with a non zero loss
-	void negLatentSearch(const std::vector<Scene> & scenes, const Object::Name name,
+	/*void negLatentSearch(const std::vector<Scene> & scenes, const Object::Name name,
 						 const int padx, const int pady, const int interval, const int maxNegatives,
-						 std::vector<std::pair<Model, int> > & negatives) const;
+						 std::vector<std::pair<Model, int> > & negatives) const;*/
 
 	void negLatentSearchInMemory(const std::vector<InMemoryScene> & scenes,
                                  const int padx, const int pady, const int interval, const int maxNegatives,

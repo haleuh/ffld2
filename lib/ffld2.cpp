@@ -1,33 +1,53 @@
+#include "../Intersector.h"
+#include "../Scene.h"
+#include "../Mixture.h"
+#include <fstream>
 #include "ffld2.h"
 
 using namespace FFLD;
+Mixture mixture = Mixture();
+struct Detection : public Rectangle
+{
+    HOGPyramid::Scalar score;
+
+    Detection() : score(0)
+    {
+    }
+
+    Detection(HOGPyramid::Scalar score, Rectangle bndbox) : Rectangle(bndbox), score(score)
+    {
+    }
+
+    bool operator<(const Detection & detection) const
+    {
+        return score > detection.score;
+    }
+};
 
 
-bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
-                         const std::vector<InMemoryScene> negative_scenes,
-                         const int padx, const int pady,
-                         const bool cacheWisdom);
-
-
-void detect(const Mixture & mixture, const unsigned char* image_array,
+std::vector<Rect> detect(const unsigned char* image_array,
             const int width, const int height, const int n_channels,
             const int padding, const int interval, const double threshold,
             const bool cacheWisdom,
-            const double overlap, std::vector<Detection> & detections) {
+            const double overlap) {
+    std::vector<Rect> rects;
+    if (mixture.empty())
+        return rects;
 
+    std::vector<Detection> detections;
     JPEGImage image(width, height, n_channels, image_array);
     HOGPyramid pyramid(image, padding, padding, interval);
 
     // Invalid image
     if (pyramid.empty()) {
-        return;
+        return rects;
     }
 
     // Couldn't initialize FFTW
     if (!Patchwork::InitFFTW((pyramid.levels()[0].rows() - padding + 15) & ~15,
                              (pyramid.levels()[0].cols() - padding + 15) & ~15,
                              cacheWisdom)) {
-        return;
+        return rects;
     }
 
     mixture.cacheFilters();
@@ -91,47 +111,20 @@ void detect(const Mixture & mixture, const unsigned char* image_array,
     // Non maxima suppression
     sort(detections.begin(), detections.end());
 
-    for (unsigned int i = 1; i < detections.size(); ++i)
-        detections.resize(remove_if(detections.begin() + i, detections.end(),
-                                    Intersector(detections[i - 1], overlap, true)) -
-                          detections.begin());
+    for (unsigned int i = 1; i < detections.size(); ++i) {
+        detections.resize(remove_if(detections.begin() + i, detections.end(), Intersector(detections[i-1], overlap, true)) - detections.begin());
+    }
+
+    // Copy to Rect output
+    for (unsigned int i = 0; i < detections.size(); ++i) {
+        Rect rect = Rect((float)detections[i].score, detections[i].x(),detections[i].x(),detections[i].width(),detections[i].height());
+        rects.push_back(rect);
+    }
+    return rects;
 }
 
-void detect(const std::string mixture_filepath,
-            const unsigned char* image_array,
-            const int width, const int height, const int n_channels,
-            const int padding, const int interval, const double threshold,
-            const bool cacheWisdom, const double overlap, 
-            std::vector<Detection> & detections) {
-
-    // Failed to load mixture model
-    Mixture mixture;
-    if(!load_mixture_model(mixture_filepath, mixture))
-        return;
-
-    detect(mixture, image_array, width, height, n_channels, padding, interval,
-           threshold, cacheWisdom, overlap, detections);
-}
-
-void detect(const char* mixture_data,
-            const unsigned char* image_array,
-            const int width, const int height, const int n_channels,
-            const int padding, const int interval, const double threshold, 
-            const bool cacheWisdom, const double overlap, 
-            std::vector<Detection> & detections) {
-
-    // Failed to load mixture model
-    Mixture mixture;
-    if(!load_mixture_model(mixture_data, mixture))
-        return;
-
-    detect(mixture, image_array, width, height, n_channels, padding, interval,
-           threshold, cacheWisdom, overlap, detections);
-}
-
-bool load_mixture_model(const std::string filepath,
-                       Mixture& mixture) {
-    std::ifstream in(filepath.c_str(), std::ios::binary);
+bool set_mixture_model(const std::string model_path) {
+    std::ifstream in(model_path.c_str(), std::ios::binary);
 
     if (!in.is_open()) {
         return false;
@@ -140,121 +133,4 @@ bool load_mixture_model(const std::string filepath,
     in >> mixture;
 
     return true;
-}
-
-bool save_mixture_model(const std::string filepath,
-                        const Mixture& mixture) {
-    std::ofstream out(filepath.c_str(), std::ios::binary);
-
-    if (!out.is_open()) {
-        return false;
-    }
-
-    out << mixture;
-
-    return true;
-}
-
-bool initializePatchWork(const std::vector<InMemoryScene> positive_scenes,
-                         const std::vector<InMemoryScene> negative_scenes,
-                         const int padx, const int pady, 
-                         const bool cacheWisdom)
-{
-	int maxRows = 0;
-	int maxCols = 0;
-
-	for(unsigned int i = 0; i < positive_scenes.size(); i++) {
-	    Scene scene = positive_scenes[i];
-        maxRows = std::max(maxRows, (scene.height() + 3) / 4 + pady);
-        maxCols = std::max(maxCols, (scene.width() + 3) / 4 + padx);
-	}
-    for(unsigned int i = 0; i < negative_scenes.size(); i++) {
-        Scene scene = negative_scenes[i];
-        maxRows = std::max(maxRows, (scene.height() + 3) / 4 + pady);
-        maxCols = std::max(maxCols, (scene.width() + 3) / 4 + padx);
-    }
-    // I'm not sure what this was for, since it doesn't seem to be used
-    // in train.cpp
-    //nbNegativeScenes -= negative_scenes.size();
-
-	// Initialize the Patchwork class
-	if (!Patchwork::InitFFTW((maxRows + 15) & ~15, (maxCols + 15) & ~15, cacheWisdom)) {
-		return false;
-	}
-	return true;
-}
-
-bool train(const std::vector<InMemoryScene> positive_scenes,
-           const std::vector<InMemoryScene> negative_scenes,
-           const int nbComponents,
-           const int padx, const int pady, const bool cacheWisdom,
-           const int interval, const int nbRelabel,
-           const int nbDatamine, const int maxNegatives,
-           const double C, const double J,
-           const double overlap, const std::string model_out_path)
-{
-    // Can't build a model from empty scenes
-    if (positive_scenes.empty() || negative_scenes.empty()) {
-        return false;
-    }
-
-    // Initialize FFTW
-    if (!initializePatchWork(positive_scenes, negative_scenes, padx, pady, cacheWisdom))
-        return false;
-
-	// The mixture to train
-	Mixture mixture(nbComponents, positive_scenes);
-
-	if (mixture.empty()) {
-	    return false;
-	}
-
-    // Pre-train the model
-	mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
-	                      interval, nbRelabel / 2.0, nbDatamine, maxNegatives,
-	                      C, J, overlap);
-
-	if (mixture.models()[0].parts().size() == 1)
-		mixture.initializeParts(8, std::make_pair(6, 6));
-
-	mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
-	                      interval, nbRelabel, nbDatamine, maxNegatives, C, J,
-				          overlap);
-
-	// Write result to file
-	if (!save_mixture_model(model_out_path, mixture))
-	    return false;
-
-	return true;
-}
-
-bool train(const std::vector<InMemoryScene> positive_scenes,
-           const std::vector<InMemoryScene> negative_scenes,
-           const int padx, const int pady, const bool cacheWisdom,
-           const int interval, const int nbRelabel,
-           const int nbDatamine, const int maxNegatives,
-           const double C, const double J,
-           const double overlap, Mixture& mixture)
-{
-    // Can't build a model from empty scenes
-	if (positive_scenes.empty() || negative_scenes.empty()) {
-		return false;
-	}
-
-    // Initialize FFTW
-    if (!initializePatchWork(positive_scenes, negative_scenes, padx, pady, cacheWisdom))
-        return false;
-
-    // If we've been given an empty model, then pre-train first
-    mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
-                          interval, nbRelabel / 2.0, nbDatamine,
-                          maxNegatives, C, J, overlap);
-
-	if (mixture.models()[0].parts().size() == 1)
-		mixture.initializeParts(8, std::make_pair(6, 6));
-
-	mixture.trainInMemory(positive_scenes, negative_scenes, padx, pady,
-	                      interval, nbRelabel, nbDatamine, maxNegatives, C, J,
-                              overlap);
-	return true;
 }

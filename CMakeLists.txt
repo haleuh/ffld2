@@ -12,12 +12,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 PROJECT(FFLD)
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})
 
 # The build options
-OPTION(FFLD_HOGPYRAMID_DOUBLE "Use doubles instead of floats (slower, uses twice more memory, and the increase in precision is not necessarily useful)." OFF)
+OPTION(FFLD_HOGPYRAMID_DOUBLE "Use doubles instead of floats (slower, uses twice more memory, and the increase in precision is not necessarily useful)." ON)
 OPTION(FFLD_HOGPYRAMID_EXTRA_FEATURES "Use extra features (LBP + color) in addition to HOG." OFF)
 OPTION(FFLD_MODEL_3D "Allow parts to also deform across scales." OFF)
 OPTION(FFLD_MIXTURE_STANDARD_CONVOLUTION "Use standard convolutions instead of the optimized Fourier ones." OFF)
+OPTION(BUILD_TEST_LIB "Build a test using lib" ON)
 
 # Select a default build configuration if none was chosen
 IF(NOT CMAKE_BUILD_TYPE)
@@ -25,13 +27,11 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 # Also list the headers so that they are displayed along the .cpp files in the IDE
-SET(HEADERS HOGPyramid.h Intersector.h JPEGImage.h LBFGS.h Mixture.h Model.h Object.h Patchwork.h Rectangle.h Scene.h SimpleOpt.h)
-SET(SOURCES HOGPyramid.cpp JPEGImage.cpp LBFGS.cpp Mixture.cpp Model.cpp Object.cpp Patchwork.cpp Rectangle.cpp Scene.cpp)
-ADD_EXECUTABLE(train ${HEADERS} ${SOURCES} train.cpp)
-ADD_EXECUTABLE(test ${HEADERS} ${SOURCES} test.cpp)
+SET(HEADERS lib/ffld2.h HOGPyramid.h Intersector.h JPEGImage.h LBFGS.h Mixture.h Model.h Object.h Patchwork.h Rectangle.h Scene.h SimpleOpt.h)
+SET(SOURCES lib/ffld2.cpp HOGPyramid.cpp JPEGImage.cpp LBFGS.cpp Mixture.cpp Model.cpp Object.cpp Patchwork.cpp Rectangle.cpp Scene.cpp)
 
 # Add a library version of the software that we can link against
-ADD_LIBRARY(ffld2 ${HEADERS} lib/ffld2.h ${SOURCES} lib/ffld2.cpp)
+ADD_LIBRARY(ffld2 ${HEADERS} ${SOURCES} )
 
 # Define the options
 IF(FFLD_HOGPYRAMID_DOUBLE)
@@ -54,42 +54,19 @@ IF(FFLD_MIXTURE_STANDARD_CONVOLUTION)
   ADD_DEFINITIONS(-DFFLD_MIXTURE_STANDARD_CONVOLUTION)
 ENDIF()
 
-# There are no CMake Eigen package, so find it ourselves
-FILE(GLOB EIGEN_ARCHIVE "eigen*")
-FIND_PATH(EIGEN_INCLUDE_DIR Eigen ${EIGEN_ARCHIVE} .)
-IF(NOT EIGEN_INCLUDE_DIR)
-  MESSAGE(FATAL_ERROR "Could not find Eigen.")
-ENDIF()
-INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIR})
+# The FindEigen3.cmake and FindFFTW.cmake are copied from Eigen3
+FIND_PACKAGE(Eigen3 REQUIRED)
+add_definitions     ( ${EIGEN3_DEFINITIONS} )
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
 
-# There are no CMake FFTW package, so find it ourselves
-FIND_PATH(FFTW3_INCLUDE_DIR fftw3.h)
+FIND_PACKAGE(FFTW REQUIRED)
+INCLUDE_DIRECTORIES(${FFTW_INCLUDES})
 IF(FFLD_HOGPYRAMID_DOUBLE)
-  FIND_LIBRARY(FFTW3_LIBRARIES fftw3)
+  TARGET_LINK_LIBRARIES(ffld2 ${FFTW_LIB})
 ELSE()
-  FIND_LIBRARY(FFTW3_LIBRARIES fftw3f)
-ENDIF()
-IF(NOT FFTW3_INCLUDE_DIR OR NOT FFTW3_LIBRARIES)
-  MESSAGE(FATAL_ERROR "Could not find fftw3.")
-ENDIF()
-INCLUDE_DIRECTORIES(${FFTW3_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(train ${FFTW3_LIBRARIES})
-TARGET_LINK_LIBRARIES(test ${FFTW3_LIBRARIES})
-
-FIND_PACKAGE(JPEG REQUIRED)
-IF(JPEG_FOUND)
-  INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
-  TARGET_LINK_LIBRARIES(train ${JPEG_LIBRARIES})
-  TARGET_LINK_LIBRARIES(test ${JPEG_LIBRARIES})
+  TARGET_LINK_LIBRARIES(ffld2 ${FFTWF_LIB})
 ENDIF()
 
-FIND_PACKAGE(LibXml2 REQUIRED)
-IF(LIBXML2_FOUND)
-  INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-  TARGET_LINK_LIBRARIES(train ${LIBXML2_LIBRARIES})
-  TARGET_LINK_LIBRARIES(test ${LIBXML2_LIBRARIES})
-  ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
-ENDIF()
 
 # Not required, but stronlgy recommended on multi-core systems
 FIND_PACKAGE(OpenMP)
@@ -97,4 +74,12 @@ IF(OPENMP_FOUND)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
+ENDIF()
+
+IF(BUILD_TEST_LIB)
+  ADD_EXECUTABLE(testlib lib/ffld2.h testlib.cpp)
+  FIND_PACKAGE(OpenCV)
+  INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES( testlib ${OpenCV_LIBS})
+  TARGET_LINK_LIBRARIES( testlib ffld2)
 ENDIF()

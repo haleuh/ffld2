@@ -26,7 +26,7 @@
 #include <iostream>
 #include <utility>
 
-#include <jpeglib.h>
+//#include <jpeglib.h>
 #include <stdio.h>
 
 using namespace FFLD;
@@ -53,6 +53,7 @@ height_(0), depth_(0)
 		copy(bits, bits + bits_.size(), bits_.begin());
 }
 
+/*
 JPEGImage::JPEGImage(const string & filename) : width_(0), height_(0), depth_(0)
 {
 	// Load the image
@@ -98,7 +99,7 @@ JPEGImage::JPEGImage(const string & filename) : width_(0), height_(0), depth_(0)
 	height_ = cinfo.image_height;
 	depth_ = cinfo.num_components;
 	bits_.swap(bits);
-}
+} */
 
 bool JPEGImage::empty() const
 {
@@ -140,6 +141,7 @@ uint8_t * JPEGImage::scanLine(int y)
 	return (empty() || (y >= height_)) ? 0 : &bits_[y * width_ * depth_];
 }
 
+/*
 void JPEGImage::save(const string & filename, int quality) const
 {
 	if (empty())
@@ -176,7 +178,7 @@ void JPEGImage::save(const string & filename, int quality) const
 	jpeg_finish_compress(&cinfo);
 	
 	fclose(file);
-}
+} */
 
 // Bilinear interpolation coefficient
 namespace FFLD

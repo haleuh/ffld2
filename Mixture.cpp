@@ -102,7 +102,7 @@ pair<int, int> Mixture::maxSize() const
 	
 	return size;
 }
-
+/*
 double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx, int pady,
 					  int interval, int nbRelabel, int nbDatamine, int maxNegatives, double C,
 					  double J, double overlap)
@@ -237,7 +237,7 @@ double Mixture::train(const vector<Scene> & scenes, Object::Name name, int padx,
 	}
 	
 	return loss;
-}
+} */
 
 double Mixture::trainInMemory(const vector<InMemoryScene> & positive_scenes,
                               const vector<InMemoryScene> & negative_scenes,
@@ -495,7 +495,7 @@ static inline void clipBndBox(Rectangle & bndbox, const int container_width, con
 	if (bndbox.bottom() >= container_height)
 		bndbox.setBottom(container_height - 1 + (bndbox.bottom() - container_height + 1) * alpha + 0.5);
 }
-
+/*
 void Mixture::posLatentSearch(const vector<Scene> & scenes, const Object::Name name,
                               const int padx, const int pady, const int interval, const double overlap,
 							  vector<pair<Model, int> > & positives) const
@@ -530,7 +530,7 @@ void Mixture::posLatentSearch(const vector<Scene> & scenes, const Object::Name n
                            padx, pady, interval, overlap,
                            positives);
 	}
-}
+} */
 
 void Mixture::posLatentSearchInMemory(const vector<InMemoryScene> & scenes,
                                       const int padx, const int pady, const int interval, const double overlap,
@@ -691,6 +691,7 @@ static inline bool operator<(const Model & a, const Model & b)
 			    ((a.parts()[0].deformation(1) < b.parts()[0].deformation(1))))))));
 }
 
+/*
 void Mixture::negLatentSearch(const vector<Scene> & scenes, const Object::Name name,
                               const int padx, const int pady, const int interval, const int maxNegatives,
 							  vector<pair<Model, int> > & negatives) const
@@ -723,7 +724,7 @@ void Mixture::negLatentSearch(const vector<Scene> & scenes, const Object::Name n
 							   negatives, j))
         	return;
 	}
-}
+} */
 
 void Mixture::negLatentSearchInMemory(const vector<InMemoryScene> & scenes,
                                       const int padx, const int pady, const int interval, const int maxNegatives,

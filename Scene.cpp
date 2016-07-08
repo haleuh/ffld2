@@ -25,7 +25,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <libxml/parser.h>
+//#include <libxml/parser.h>
 
 using namespace FFLD;
 using namespace std;
@@ -46,12 +46,13 @@ bool Scene::empty() const
 		   objects().empty();
 }
 
+/*
 template <typename Result>
 static inline Result content(const xmlNodePtr cur)
 {
 	if ((cur == NULL) || (cur->xmlChildrenNode == NULL))
 		return Result();
-	
+
 	istringstream iss(reinterpret_cast<const char *>(cur->xmlChildrenNode->content));
 	Result result;
 	iss >> result;
@@ -66,35 +67,35 @@ Scene::Scene(const string & filename)
 		"diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa",
 		"train", "tvmonitor"
 	};
-	
+
 	const string Poses[4] =
 	{
 		"Frontal", "Left", "Rear", "Right"
 	};
-	
+
 	xmlDoc * doc = xmlParseFile(filename.c_str());
-	
+
 	if (doc == NULL) {
 		cerr << "Could not open " << filename << endl;
 		return;
 	}
-	
+
 	xmlNodePtr cur = xmlDocGetRootElement(doc);
-	
+
 	if (cur == NULL) {
 		xmlFreeDoc(doc);
 		cerr << "Could not open " << filename << endl;
 		return;
 	}
-	
+
 	if (xmlStrcmp(cur->name, reinterpret_cast<const xmlChar *>("annotation"))) {
 		xmlFreeDoc(doc);
 		cerr << "Could not open " << filename << endl;
 		return;
 	}
-	
+
 	cur = cur->xmlChildrenNode;
-	
+
 	while (cur != NULL) {
 		if (!xmlStrcmp(cur->name, reinterpret_cast<const xmlChar *>("filename"))) {
 			// Full path
@@ -110,7 +111,7 @@ Scene::Scene(const string & filename)
 		}
 		else if (!xmlStrcmp(cur->name, reinterpret_cast<const xmlChar *>("size"))) {
 			xmlNodePtr cur2 = cur->xmlChildrenNode;
-			
+
 			while (cur2 != NULL) {
 				if (!xmlStrcmp(cur2->name, reinterpret_cast<const xmlChar *>("width")))
 					width_ = content<int>(cur2);
@@ -118,27 +119,27 @@ Scene::Scene(const string & filename)
 					height_ = content<int>(cur2);
 				else if (!xmlStrcmp(cur2->name, reinterpret_cast<const xmlChar *>("depth")))
 					depth_ = content<int>(cur2);
-				
+
 				cur2 = cur2->next;
 			}
 		}
 		else if (!xmlStrcmp(cur->name, reinterpret_cast<const xmlChar *>("object"))) {
 			objects_.push_back(Object());
-			
+
 			xmlNodePtr cur2 = cur->xmlChildrenNode;
-			
+
 			while (cur2 != NULL) {
 				if (!xmlStrcmp(cur2->name, reinterpret_cast<const xmlChar *>("name"))) {
 					const string * iter =
 						find(Names, Names + 20, content<string>(cur2));
-					
+
 					if (iter != Names + 20)
 						objects_.back().setName(static_cast<Object::Name>(iter - Names));
 				}
 				else if (!xmlStrcmp(cur2->name, reinterpret_cast<const xmlChar *>("pose"))) {
 					const string * iter =
 						find(Poses, Poses + 4, content<string>(cur2));
-					
+
 					if (iter != Poses + 4)
 						objects_.back().setPose(static_cast<Object::Pose>(iter - Poses));
 				}
@@ -150,9 +151,9 @@ Scene::Scene(const string & filename)
 				}
 				else if (!xmlStrcmp(cur2->name, reinterpret_cast<const xmlChar *>("bndbox"))) {
 					Rectangle bndbox;
-					
+
 					xmlNodePtr cur3 = cur2->xmlChildrenNode;
-					
+
 					while (cur3 != NULL) {
 						if (!xmlStrcmp(cur3->name, reinterpret_cast<const xmlChar *>("xmin")))
 							bndbox.setX(content<int>(cur3));
@@ -162,10 +163,10 @@ Scene::Scene(const string & filename)
 							bndbox.setWidth(content<int>(cur3));
 						else if (!xmlStrcmp(cur3->name, reinterpret_cast<const xmlChar *>("ymax")))
 							bndbox.setHeight(content<int>(cur3));
-						
+
 						cur3 = cur3->next;
 					}
-					
+
 					// Only set the bounding box if all values have been assigned
 					if (bndbox.x() && bndbox.y() && bndbox.width() && bndbox.height()) {
 						bndbox.setX(bndbox.x() - 1);
@@ -175,16 +176,17 @@ Scene::Scene(const string & filename)
 						objects_.back().setBndbox(bndbox);
 					}
 				}
-				
+
 				cur2 = cur2->next;
 			}
 		}
-		
+
 		cur = cur->next;
 	}
-	
+
 	xmlFreeDoc(doc);
 }
+*/
 
 int Scene::width() const
 {
