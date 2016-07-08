@@ -1,10 +1,11 @@
 # Simplified lib
-This project is a simplified version of [menpo/ffld2](https://github.com/menpo/ffld2).
++ This project is a simplified version of [menpo/ffld2](https://github.com/menpo/ffld2).
 + What changed?
   - Only detect function, remove train function
   - Do not need libxml and libjpeg any more
   - Simplify header, so we only need to include ffld2.h to use this lib
   - Add a simple python wrapper using ctypes
+
 # Amended Readme
 This project was originally forked from https://github.com/fanxu/ffld2, which in
 turn was a repository created for the code of Charles Dubout.
