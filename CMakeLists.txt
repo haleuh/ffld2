@@ -27,7 +27,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 # Also list the headers so that they are displayed along the .cpp files in the IDE
-SET(HEADERS lib/ffld2.h HOGPyramid.h Intersector.h JPEGImage.h LBFGS.h Mixture.h Model.h Object.h Patchwork.h Rectangle.h Scene.h SimpleOpt.h)
+SET(HEADERS lib/ffld2.h HOGPyramid.h Intersector.h JPEGImage.h LBFGS.h Mixture.h Model.h Object.h Patchwork.h Rectangle.h Scene.h)
 SET(SOURCES lib/ffld2.cpp HOGPyramid.cpp JPEGImage.cpp LBFGS.cpp Mixture.cpp Model.cpp Object.cpp Patchwork.cpp Rectangle.cpp Scene.cpp)
 
 # Add a library version of the software that we can link against
