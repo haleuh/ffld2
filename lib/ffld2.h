@@ -21,7 +21,7 @@ typedef struct Rect
 	}
 } Rect;
 
-DllExport bool set_mixture_model(const std::string model_path);
+DllExport bool init_face_detection_model();
 
 // Detect using a loaded model
 DllExport std::vector<Rect> detect(const unsigned char* image,

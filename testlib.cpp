@@ -9,8 +9,8 @@ using namespace std;
 
 int main( int argc, char **argv )
 {
-    if (argc < 3) {
-        cout << "Usage: " << argv[0] << " image_path model_path" << endl;
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " image_path" << endl;
         return 1;
     }
 
@@ -21,8 +21,7 @@ int main( int argc, char **argv )
         cout <<  "Could not open or find the image" << endl ;
         return 1;
     }
-    string model_path = argv[2];
-    if (set_mixture_model(model_path))
+    if (init_face_detection_model())
         rects = detect(image.data, image.cols, image.rows, image.channels(), 6, 5, 0.5, true, 0.3);
     for(unsigned int i = 0; i < rects.size(); i++){
         cv::rectangle(image, cv::Point( rects[i].x, rects[i].y ),
