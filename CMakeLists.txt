@@ -84,3 +84,6 @@ IF (BUILD_LIB_TEST)
     TARGET_LINK_LIBRARIES(testlib ${OpenCV_LIBS})
     TARGET_LINK_LIBRARIES(testlib ffld2)
 ENDIF ()
+
+install(TARGETS ffld2 DESTINATION lib)
+install(FILES lib/ffld2.h DESTINATION include)
