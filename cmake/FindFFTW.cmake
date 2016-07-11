@@ -38,12 +38,17 @@ else()
   set( CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX} )
 endif()
 
+set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+if (MSVC)
+  set( CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} )
+endif ()
+
 if( FFTW_ROOT )
 
   #find libs
   find_library(
     FFTW_LIB
-    NAMES "fftw3"
+    NAMES "fftw3" "fftw3-3"
     PATHS ${FFTW_ROOT}
     PATH_SUFFIXES "lib" "lib64"
     NO_DEFAULT_PATH
@@ -51,7 +56,7 @@ if( FFTW_ROOT )
 
   find_library(
     FFTWF_LIB
-    NAMES "fftw3f"
+    NAMES "fftw3f" "fftw3f-3"
     PATHS ${FFTW_ROOT}
     PATH_SUFFIXES "lib" "lib64"
     NO_DEFAULT_PATH
@@ -59,7 +64,7 @@ if( FFTW_ROOT )
 
   find_library(
     FFTWL_LIB
-    NAMES "fftw3l"
+    NAMES "fftw3l" "fftw3l-3"
     PATHS ${FFTW_ROOT}
     PATH_SUFFIXES "lib" "lib64"
     NO_DEFAULT_PATH
@@ -78,20 +83,20 @@ else()
 
   find_library(
     FFTW_LIB
-    NAMES "fftw3"
+    NAMES "fftw3" "fftw3-3"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
   )
 
   find_library(
     FFTWF_LIB
-    NAMES "fftw3f"
+    NAMES "fftw3f" "fftw3f-3"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
   )
 
 
   find_library(
     FFTWL_LIB
-    NAMES "fftw3l"
+    NAMES "fftw3l" "fftw3l-3"
     PATHS ${PKG_FFTW_LIBRARY_DIRS} ${LIB_INSTALL_DIR}
   )
 

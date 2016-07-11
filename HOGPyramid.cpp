@@ -31,6 +31,10 @@ using namespace Eigen;
 using namespace FFLD;
 using namespace std;
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 HOGPyramid::HOGPyramid() : padx_(0), pady_(0), interval_(0)
 {
 }
@@ -44,7 +48,7 @@ pady_(0), interval_(0)
 	}
 	
 	// Compute the number of scales such that the smallest size of the last level is 5
-	const int maxScale = ceil(log(min(image.width(), image.height()) / 40.0) / log(2.0) * interval);
+	const int maxScale = (int) ceil(log(min(image.width(), image.height()) / 40.0) / log(2.0) * interval);
 	
 	// Cannot compute the pyramid on images too small
 	if (maxScale < interval) {
@@ -201,7 +205,7 @@ private:
 					angle -= 18.0;
 				
 				// Bilinear interpolation
-				const int bin0 = angle;
+				const int bin0 = (int) angle;
 				const int bin1 = (bin0 < 17) ? (bin0 + 1) : 0;
 				const double alpha = angle - bin0;
 				
@@ -277,8 +281,8 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 			// Bilinear interpolation
 			const Scalar xp = (x + static_cast<Scalar>(0.5)) * invCellSize + padx - 0.5f;
 			const Scalar yp = (y + static_cast<Scalar>(0.5)) * invCellSize + pady - 0.5f;
-			const int ixp = xp;
-			const int iyp = yp;
+			const int ixp = (int) xp;
+			const int iyp = (int) yp;
 			const Scalar xp0 = xp - ixp;
 			const Scalar yp0 = yp - iyp;
 			const Scalar xp1 = 1 - xp0;

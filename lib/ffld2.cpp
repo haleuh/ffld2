@@ -25,7 +25,7 @@ struct Detection : public Rectangle
 };
 
 
-std::vector<Rect> detect(const unsigned char* image_array,
+DllExport std::vector<Rect> detect(const unsigned char* image_array,
             const int width, const int height, const int n_channels,
             const int padding, const int interval, const double threshold,
             const bool cacheWisdom,
@@ -125,11 +125,10 @@ std::vector<Rect> detect(const unsigned char* image_array,
 
 bool set_mixture_model(const std::string model_path) {
     std::ifstream in(model_path.c_str(), std::ios::binary);
-
     if (!in.is_open()) {
         return false;
     }
-
+//    std::istringstream in(headhunter_dpm_baseline, std::ios::binary);
     in >> mixture;
 
     return true;
