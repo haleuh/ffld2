@@ -117,7 +117,7 @@ DllExport std::vector<Rect> detect(const unsigned char* image_array,
 
     // Copy to Rect output
     for (unsigned int i = 0; i < detections.size(); ++i) {
-        Rect rect = Rect((float)detections[i].score, detections[i].x(),detections[i].x(),detections[i].width(),detections[i].height());
+        Rect rect = Rect((float)detections[i].score, detections[i].x(),detections[i].y(),detections[i].width(),detections[i].height());
         rects.push_back(rect);
     }
     return rects;
