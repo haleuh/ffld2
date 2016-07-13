@@ -1,7 +1,7 @@
 #include "../Intersector.h"
 #include "../Scene.h"
 #include "../Mixture.h"
-#include <fstream>
+#include <iostream>
 #include "ffld2.h"
 
 using namespace FFLD;
@@ -26,106 +26,7 @@ struct Detection : public Rectangle
     }
 };
 
-
-DllExport std::vector<Rect> detect(const unsigned char* image_array,
-            const int width, const int height, const int n_channels,
-            const int padding, const int interval, const double threshold,
-            const bool cacheWisdom,
-            const double overlap) {
-    std::vector<Rect> rects;
-    if (mixture.empty())
-        return rects;
-
-    std::vector<Detection> detections;
-    JPEGImage image(width, height, n_channels, image_array);
-    HOGPyramid pyramid(image, padding, padding, interval);
-
-    // Invalid image
-    if (pyramid.empty()) {
-        return rects;
-    }
-
-    // Couldn't initialize FFTW
-    if (!Patchwork::InitFFTW((pyramid.levels()[0].rows() - padding + 15) & ~15,
-                             (pyramid.levels()[0].cols() - padding + 15) & ~15,
-                             cacheWisdom)) {
-        return rects;
-    }
-
-    mixture.cacheFilters();
-
-    // Compute the scores
-    std::vector<HOGPyramid::Matrix> scores;
-    std::vector<Mixture::Indices> argmaxes;
-    std::vector<std::vector<std::vector<Model::Positions> > > positions;
-
-    mixture.convolve(pyramid, scores, argmaxes, &positions);
-
-    // Cache the size of the models
-    std::vector<std::pair<int, int> > sizes(mixture.models().size());
-
-    for (unsigned int i = 0; i < sizes.size(); ++i) {
-        sizes[i] = mixture.models()[i].rootSize();
-    }
-
-    // For each scale
-    for (unsigned int z = 0; z < scores.size(); ++z) {
-        const double scale = pow(2.0, static_cast<double>(z) / pyramid.interval() + 2);
-
-        const int rows = static_cast<int>(scores[z].rows());
-        const int cols = static_cast<int>(scores[z].cols());
-
-        for (int y = 0; y < rows; ++y) {
-            for (int x = 0; x < cols; ++x) {
-                const double score = scores[z](y, x);
-
-                if (score > threshold) {
-                    // Non-maxima suppresion in a 3x3 neighborhood
-                    if (((y == 0) || (x == 0) || (score >= scores[z](y - 1, x - 1))) &&
-                        ((y == 0) || (score >= scores[z](y - 1, x))) &&
-                        ((y == 0) || (x == cols - 1) || (score >= scores[z](y - 1, x + 1))) &&
-                        ((x == 0) || (score >= scores[z](y, x - 1))) &&
-                        ((x == cols - 1) || (score >= scores[z](y, x + 1))) &&
-                        ((y == rows - 1) || (x == 0) || (score >= scores[z](y + 1, x - 1))) &&
-                        ((y == rows - 1) || (score >= scores[z](y + 1, x))) &&
-                        ((y == rows - 1) || (x == cols - 1) ||
-                         (score >= scores[z](y + 1, x + 1)))) {
-                        Rectangle bndbox((x - pyramid.padx()) * scale + 0.5,
-                                         (y - pyramid.pady()) * scale + 0.5,
-                                         sizes[argmaxes[z](y, x)].second * scale + 0.5,
-                                         sizes[argmaxes[z](y, x)].first * scale + 0.5);
-
-                        // Truncate the object
-                        bndbox.setX(std::max(bndbox.x(), 0));
-                        bndbox.setY(std::max(bndbox.y(), 0));
-                        bndbox.setWidth(std::min(bndbox.width(), width - bndbox.x()));
-                        bndbox.setHeight(std::min(bndbox.height(), height - bndbox.y()));
-
-                        if (!bndbox.empty()) {
-                            detections.push_back(Detection(score, bndbox));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Non maxima suppression
-    sort(detections.begin(), detections.end());
-
-    for (unsigned int i = 1; i < detections.size(); ++i) {
-        detections.resize(remove_if(detections.begin() + i, detections.end(), Intersector(detections[i-1], overlap, true)) - detections.begin());
-    }
-
-    // Copy to Rect output
-    for (unsigned int i = 0; i < detections.size(); ++i) {
-        Rect rect = Rect((float)detections[i].score, detections[i].x(),detections[i].y(),detections[i].width(),detections[i].height());
-        rects.push_back(rect);
-    }
-    return rects;
-}
-
-bool init_face_detection_model() {
+void load_face_detection_model() {
     std::ostringstream sout;
     sout << "6" << std::endl;
     sout << "9 -3.901899" << std::endl;
@@ -532,8 +433,113 @@ bool init_face_detection_model() {
     sout << "0.005333 -0.016868 -0.010831 -0.023623 -0.005213 -0.024468 -0.007644 0.015053 0.026607 -0.008148 -0.003754 -0.001655 0.006374 -0.014337 -0.011247 -0.016978 -0.008749 -0.004518 -0.002179 -0.014033 -0.014289 -0.011676 -0.013345 -0.030374 -0.021840 0.003245 0.011167 -0.012703 -0.000609 -0.021259 -0.014769 -0.021870 -0.006826 -0.022287 -0.010145 -0.012667 0.023237 -0.011559 -0.002767 0.002515 0.018835 -0.007746 0.013980 0.008372 0.000646 -0.005767 -0.006501 -0.016139 0.003403 -0.006799 -0.007944 -0.014070 0.004729 -0.004901 0.016092 -0.019557 -0.015253 0.001390 -0.000393 -0.001542 0.000946 -0.012347 -0.005072 -0.023408 -0.000787 -0.020384 0.003920 -0.001978 0.014760 -0.006354 -0.012377 0.016900 0.001236 0.006208 0.002501 0.017934 -0.005182 -0.009496 -0.018328 -0.011440 0.004775 0.017223 0.003088 -0.016376 0.020143 -0.007432 0.005499 -0.027765 -0.019295 0.009781 0.014597 -0.005143 0.012255 -0.010425 0.002904 -0.035229 -0.005786 -0.009184 -0.006391 0.001081 -0.000789 -0.009110 -0.006699 0.018197 0.001705 0.018348 -0.006504 0.008981 0.004450 -0.002444 -0.012944 -0.018583 0.002729 0.024502 -0.000817 -0.010468 0.006906 0.004668 -0.008302 -0.018344 -0.010214 0.016041 0.015920 0.001196 0.008019 -0.005690 -0.002790 -0.037664 0.012607 0.007308 0.017439 0.027004 -0.003519 -0.013945 -0.017019 -0.006504 0.000083 0.006614 -0.003220 0.001565 -0.017958 -0.011066 0.000668 -0.012751 -0.001748 0.007615 0.003486 0.004147 0.021023 0.001013 -0.010909 -0.009650 -0.014431 0.002423 -0.003668 0.007464 -0.002469 0.003943 -0.012156 -0.013413 0.008021 -0.006932 0.007964 0.016670 -0.002692 -0.016763 -0.015765 -0.002115 -0.007876 0.005074 -0.010360 -0.005370 -0.032810 -0.002586 0.006716 0.030776 0.023215 0.013702 0.010994 -0.022498 -0.008812 -0.004606 -0.002300 -0.007124 0.006019 0.026236 0.002494 0.003824 -0.004412 0.005883 -0.001115 -0.001938 " << std::endl;
 
     std::istringstream sin(sout.str(), std::ios::binary);
-    sout.str("");
     sin >> mixture;
+}
 
-    return true;
+bool detect(Rect* output_detected_rect,
+                      const unsigned char* image_data,
+                      const int width,
+                      const int height,
+                      const int n_channels,
+                      const int padding,
+                      const int interval,
+                      const double threshold,
+                      const bool cacheWisdom,
+                      const double overlap,
+                      const double adaptive_min_size) {
+    if (mixture.empty())
+        load_face_detection_model();
+
+    std::vector<Detection> detections;
+    JPEGImage image(width, height, n_channels, image_data);
+    HOGPyramid pyramid(image, padding, padding, interval);
+
+    // Invalid image
+    if (pyramid.empty()) {
+        return false;
+    }
+
+    // Couldn't initialize FFTW
+    if (!Patchwork::InitFFTW((pyramid.levels()[0].rows() - padding + 15) & ~15,
+                             (pyramid.levels()[0].cols() - padding + 15) & ~15,
+                             cacheWisdom)) {
+        return false;
+    }
+
+    mixture.cacheFilters();
+
+    // Compute the scores
+    std::vector<HOGPyramid::Matrix> scores;
+    std::vector<Mixture::Indices> argmaxes;
+    std::vector<std::vector<std::vector<Model::Positions> > > positions;
+
+    mixture.convolve(pyramid, scores, argmaxes, &positions);
+
+    // Cache the size of the models
+    std::vector<std::pair<int, int> > sizes(mixture.models().size());
+
+    for (unsigned int i = 0; i < sizes.size(); ++i) {
+        sizes[i] = mixture.models()[i].rootSize();
+    }
+
+    // For each scale
+    for (unsigned int z = 0; z < scores.size(); ++z) {
+        const double scale = pow(2.0, static_cast<double>(z) / pyramid.interval() + 2);
+
+        const int rows = static_cast<int>(scores[z].rows());
+        const int cols = static_cast<int>(scores[z].cols());
+
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
+                const double score = scores[z](y, x);
+
+                if (score > threshold) {
+                    // Non-maxima suppresion in a 3x3 neighborhood
+                    if (((y == 0) || (x == 0) || (score >= scores[z](y - 1, x - 1))) &&
+                        ((y == 0) || (score >= scores[z](y - 1, x))) &&
+                        ((y == 0) || (x == cols - 1) || (score >= scores[z](y - 1, x + 1))) &&
+                        ((x == 0) || (score >= scores[z](y, x - 1))) &&
+                        ((x == cols - 1) || (score >= scores[z](y, x + 1))) &&
+                        ((y == rows - 1) || (x == 0) || (score >= scores[z](y + 1, x - 1))) &&
+                        ((y == rows - 1) || (score >= scores[z](y + 1, x))) &&
+                        ((y == rows - 1) || (x == cols - 1) ||
+                         (score >= scores[z](y + 1, x + 1)))) {
+                        Rectangle bndbox((x - pyramid.padx()) * scale + 0.5,
+                                         (y - pyramid.pady()) * scale + 0.5,
+                                         sizes[argmaxes[z](y, x)].second * scale + 0.5,
+                                         sizes[argmaxes[z](y, x)].first * scale + 0.5);
+
+                        // Truncate the object
+                        bndbox.setX(std::max(bndbox.x(), 0));
+                        bndbox.setY(std::max(bndbox.y(), 0));
+                        bndbox.setWidth(std::min(bndbox.width(), width - bndbox.x()));
+                        bndbox.setHeight(std::min(bndbox.height(), height - bndbox.y()));
+
+                        if (!bndbox.empty()) {
+                            detections.push_back(Detection(score, bndbox));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Non maxima suppression
+    sort(detections.begin(), detections.end());
+
+    for (unsigned int i = 1; i < detections.size(); ++i) {
+        detections.resize(remove_if(detections.begin() + i, detections.end(), Intersector(detections[i-1], overlap, true)) - detections.begin());
+    }
+
+    // Get the rect with the highest score and satisfy the adaptive minimum size
+    for (unsigned int i = 0; i < detections.size(); ++i) {
+        if ((detections[i].width() >= width * adaptive_min_size) && (detections[i].height() >= height * adaptive_min_size)) {
+            output_detected_rect->x = detections[i].x();
+            output_detected_rect->y = detections[i].y();
+            output_detected_rect->w = detections[i].width();
+            output_detected_rect->h = detections[i].height();
+            return true;
+        }
+    }
+    return false;
 }

@@ -9,6 +9,7 @@
   - Download [Eigen](http://bitbucket.org/eigen/eigen/get/3.2.8.zip), extract and add Eigen to system path
   - Download [FFTW3](http://www.fftw.org/install/windows.html), extract and add fftw3 to system path
   - Follow the instruction on [FFTW3](http://www.fftw.org/install/windows.html) to create **.lib** file to build with MSVC
++ To use python wrapper, just import ffld2.py. Make sure that the OS can find your built library
 
 # Amended Readme
 This project was originally forked from https://github.com/fanxu/ffld2, which in

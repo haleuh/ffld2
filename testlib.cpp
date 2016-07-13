@@ -14,20 +14,18 @@ int main( int argc, char **argv )
         return 1;
     }
 
-    vector<Rect> rects;
+    Rect output_detected_rect;
     cv::Mat image = cv::imread(argv[1]);
     if(! image.data )
     {
         cout <<  "Could not open or find the image" << endl ;
         return 1;
     }
-    if (init_face_detection_model())
-        rects = detect(image.data, image.cols, image.rows, image.channels(), 6, 5, 0.5, true, 0.3);
-    for(unsigned int i = 0; i < rects.size(); i++){
-        cv::rectangle(image, cv::Point( rects[i].x, rects[i].y ),
-                      cv::Point( rects[i].x + rects[i].w, rects[i].y + rects[i].h ),
+    if (detect(&output_detected_rect, image.data, image.cols, image.rows, image.channels(), 6, 5, 0.5, true, 0.3, 0.1)) {
+        cv::rectangle(image, cv::Point( output_detected_rect.x, output_detected_rect.y ),
+                      cv::Point( output_detected_rect.x + output_detected_rect.w, output_detected_rect.y + output_detected_rect.h ),
                       cv::Scalar( 0, 255, 255 ));
-        cout << rects[i].x << " " << rects[i].y << " " << rects[i].w << " " << rects[i].h << endl;
+        cout << output_detected_rect.x << " " << output_detected_rect.y << " " << output_detected_rect.w << " " << output_detected_rect.h << endl;
     }
 
     cv::namedWindow( "Display window", cv::WINDOW_NORMAL );// Create a window for display.
