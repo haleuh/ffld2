@@ -238,7 +238,8 @@ void HOGPyramid::Hog(const JPEGImage & image, Level & level, int padx, int pady,
 	// Make sure the image is big enough
 	if ((width < cellSize) || (height < cellSize) || (depth < 1) || (padx < 1) || (pady < 1) ||
 		(cellSize < 1)) {
-		level.swap(Level());
+//		level.swap(Level());
+		level = Level();
 		cerr << "Attempting to compute an empty pyramid level" << endl;
 		return;
 	}
