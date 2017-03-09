@@ -4,3 +4,5 @@ build/*
 *~
 /wisdom.fftw
 /.idea/
+/cmake-build-debug/
+/cmake-build-release/

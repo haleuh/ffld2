@@ -10,6 +10,7 @@
 #              Written by Charles Dubout <charles.dubout@idiap.ch>
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+cmake_policy(SET CMP0012 NEW)
 PROJECT(FFLD)
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH})
 
@@ -18,7 +19,7 @@ OPTION(FFLD_HOGPYRAMID_DOUBLE "Use doubles instead of floats (slower, uses twice
 OPTION(FFLD_HOGPYRAMID_EXTRA_FEATURES "Use extra features (LBP + color) in addition to HOG." OFF)
 OPTION(FFLD_MODEL_3D "Allow parts to also deform across scales." OFF)
 OPTION(FFLD_MIXTURE_STANDARD_CONVOLUTION "Use standard convolutions instead of the optimized Fourier ones." OFF)
-OPTION(BUILD_LIB_TEST "Build a test using lib" OFF)
+OPTION(BUILD_LIB_TEST "Build a test using lib" ON)
 
 # Select a default build configuration if none was chosen
 IF (NOT CMAKE_BUILD_TYPE)
@@ -54,6 +55,7 @@ IF (FFLD_MIXTURE_STANDARD_CONVOLUTION)
 ENDIF ()
 
 FIND_PACKAGE(Eigen3 REQUIRED)
+MESSAGE("Eigen version: ${EIGEN3_VERSION}")
 ADD_DEFINITIONS(${EIGEN3_DEFINITIONS})
 INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
 
