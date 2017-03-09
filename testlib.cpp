@@ -21,6 +21,7 @@ int main( int argc, char **argv )
         cout <<  "Could not open or find the image" << endl ;
         return 1;
     }
+    cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
     if (detect(&output_detected_rect, image.data, image.cols, image.rows, image.channels(), 6, 5, 0.5, true, 0.3, 0.1)) {
         cv::rectangle(image, cv::Point( output_detected_rect.x, output_detected_rect.y ),
                       cv::Point( output_detected_rect.x + output_detected_rect.w, output_detected_rect.y + output_detected_rect.h ),
